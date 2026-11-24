@@ -1,0 +1,3320 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>溫馨追劇進度筆記</title>
+    <meta name="description" content="深夜追劇咖啡廳風格的個人追劇進度筆記，支援集數追蹤、平台自動辨識、JSON 備份還原與 PWA 安裝。" />
+    <meta property="og:title" content="溫馨追劇進度筆記" />
+    <meta property="og:description" content="深夜追劇咖啡廳風格的個人追劇進度筆記，支援集數追蹤、平台自動辨識、JSON 備份還原與 PWA 安裝。" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- PWA & Mobile Web App Meta Tags -->
+    <meta name="theme-color" content="#FAF7F2" id="metaThemeColor" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" id="metaAppleStatusBar" />
+    <meta name="apple-mobile-web-app-title" content="追劇筆記" />
+    <link rel="icon" id="appFavicon" type="image/svg+xml" href="" />
+    <link rel="apple-touch-icon" id="appleTouchIcon" href="" />
+    <link rel="manifest" id="appManifestLink" href="" />
+
+    <!-- Google Fonts: Plus Jakarta Sans & Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+
+    <!-- Initial Theme Script (prevents flash) -->
+    <script>
+      (function () {
+        try {
+          var savedTheme = localStorage.getItem('cozy_drama_theme_v1');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <style>
+      :root {
+        --bg-page: #FAF7F2;
+        --bg-surface: #FFFFFF;
+        --bg-subtle: #F3EDE4;
+        --bg-hover: #EAE0D2;
+        --bg-header: rgba(250, 247, 242, 0.88);
+        --text-primary: #332E2B;
+        --text-secondary: #6B5B53;
+        --text-muted: #8E7F76;
+        --accent: #D97757;
+        --accent-hover: #C66545;
+        --accent-soft: rgba(217, 119, 87, 0.13);
+        --accent-text: #FFFFFF;
+        --success: #4F8A68;
+        --success-soft: rgba(79, 138, 104, 0.13);
+        --danger: #C9534B;
+        --danger-soft: rgba(201, 83, 75, 0.12);
+        --border-hairline: rgba(107, 91, 83, 0.14);
+        --border-strong: rgba(107, 91, 83, 0.25);
+        --shadow-card: 0 4px 20px -4px rgba(51, 46, 43, 0.06), 0 1px 3px rgba(51, 46, 43, 0.04);
+        --shadow-tab: 0 2px 8px -2px rgba(51, 46, 43, 0.1);
+        --shadow-modal: 0 24px 60px -12px rgba(51, 46, 43, 0.25);
+        --radius-card: 16px;
+        --radius-btn: 12px;
+        --radius-input: 12px;
+        --font-sans: 'Plus Jakarta Sans', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+
+      html.dark {
+        --bg-page: #1E1B18;
+        --bg-surface: #282320;
+        --bg-subtle: #332D28;
+        --bg-hover: #3F3731;
+        --bg-header: rgba(30, 27, 24, 0.88);
+        --text-primary: #F2ECE4;
+        --text-secondary: #C6B8AD;
+        --text-muted: #988A80;
+        --accent: #E28566;
+        --accent-hover: #ED9679;
+        --accent-soft: rgba(226, 133, 102, 0.18);
+        --accent-text: #FFFFFF;
+        --success: #6EB08A;
+        --success-soft: rgba(110, 176, 138, 0.16);
+        --danger: #E4746C;
+        --danger-soft: rgba(228, 116, 108, 0.16);
+        --border-hairline: rgba(242, 236, 228, 0.10);
+        --border-strong: rgba(242, 236, 228, 0.20);
+        --shadow-card: 0 6px 24px -4px rgba(0, 0, 0, 0.36), 0 1px 3px rgba(0, 0, 0, 0.22);
+        --shadow-tab: 0 2px 8px -2px rgba(0, 0, 0, 0.35);
+        --shadow-modal: 0 24px 64px -12px rgba(0, 0, 0, 0.65);
+      }
+
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-page);
+        color: var(--text-primary);
+        font-family: var(--font-sans);
+        font-size: 15px;
+        line-height: 1.55;
+        transition: background-color 200ms cubic-bezier(0.16, 1, 0.3, 1), color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+        min-height: 100dvh;
+      }
+
+      button,
+      input,
+      textarea,
+      select {
+        font-family: inherit;
+        color: inherit;
+      }
+
+      button {
+        cursor: pointer;
+        border: none;
+        background: none;
+        padding: 0;
+      }
+
+      button:focus-visible,
+      input:focus-visible,
+      textarea:focus-visible,
+      a:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      .tabular-nums {
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* App Shell */
+      .app-header {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        background-color: var(--bg-header);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border-hairline);
+      }
+
+      .header-inner {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .brand-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(217, 119, 87, 0.28);
+        overflow: hidden;
+      }
+
+      .brand-title {
+        margin: 0;
+        font-size: 1.08rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--text-primary);
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+
+      .icon-btn {
+        min-width: 44px;
+        min-height: 44px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        transition: background-color 160ms ease, color 160ms ease, transform 120ms ease;
+      }
+
+      .icon-btn:hover {
+        background-color: var(--bg-subtle);
+        color: var(--text-primary);
+      }
+
+      .icon-btn:active {
+        transform: scale(0.95);
+      }
+
+      .pwa-install-btn {
+        height: 38px;
+        padding: 0 12px;
+        border-radius: 10px;
+        background-color: var(--accent-soft);
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        transition: background-color 160ms ease, transform 120ms ease;
+        margin-right: 4px;
+      }
+
+      .pwa-install-btn:hover {
+        background-color: var(--accent);
+        color: var(--accent-text);
+      }
+
+      .pwa-install-btn.hidden {
+        display: none;
+      }
+
+      /* Main Container */
+      .container {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 18px 16px 96px;
+      }
+
+      /* Tabs */
+      .tabs-wrapper {
+        background-color: var(--bg-subtle);
+        padding: 4px;
+        border-radius: 14px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        margin-bottom: 16px;
+      }
+
+      .tab-btn {
+        min-height: 44px;
+        padding: 8px 6px;
+        border-radius: 11px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        transition: background-color 180ms cubic-bezier(0.16, 1, 0.3, 1), color 180ms ease, box-shadow 180ms ease;
+      }
+
+      .tab-btn:hover {
+        color: var(--text-primary);
+      }
+
+      .tab-btn.active {
+        background-color: var(--bg-surface);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-tab);
+      }
+
+      .tab-count {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+
+      .tab-btn.active .tab-count {
+        color: var(--accent);
+      }
+
+      /* Toolbar: Search + Add Button */
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+
+      .search-box {
+        flex: 1;
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .search-icon {
+        position: absolute;
+        left: 13px;
+        color: var(--text-muted);
+        pointer-events: none;
+        display: flex;
+      }
+
+      .search-input {
+        width: 100%;
+        height: 44px;
+        padding: 0 36px 0 38px;
+        border-radius: var(--radius-input);
+        border: 1px solid var(--border-hairline);
+        background-color: var(--bg-surface);
+        font-size: 14px;
+        color: var(--text-primary);
+        transition: border-color 160ms ease, box-shadow 160ms ease;
+      }
+
+      .search-input::placeholder {
+        color: var(--text-muted);
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+      }
+
+      .search-clear {
+        position: absolute;
+        right: 6px;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+      }
+
+      .search-clear.visible {
+        display: flex;
+      }
+
+      .search-clear:hover {
+        background-color: var(--bg-subtle);
+        color: var(--text-primary);
+      }
+
+      .btn-primary {
+        height: 44px;
+        padding: 0 18px;
+        border-radius: var(--radius-btn);
+        background-color: var(--accent);
+        color: var(--accent-text);
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px -2px rgba(217, 119, 87, 0.35);
+        transition: background-color 160ms ease, transform 120ms ease, box-shadow 160ms ease;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--accent-hover);
+      }
+
+      .btn-primary:active {
+        transform: scale(0.97);
+      }
+
+      /* Tree Controls Bar */
+      .tree-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 12px;
+        padding: 0 2px;
+      }
+
+      .tree-summary {
+        font-size: 13px;
+        color: var(--text-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .tree-bulk-btns {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+
+      .btn-tree-bulk {
+        min-height: 36px;
+        padding: 0 11px;
+        border-radius: 10px;
+        background-color: var(--bg-subtle);
+        color: var(--text-secondary);
+        font-size: 12.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+        transition: background-color 150ms ease, color 150ms ease;
+      }
+
+      .btn-tree-bulk:hover {
+        background-color: var(--bg-hover);
+        color: var(--text-primary);
+      }
+
+      /* Drama Tree List & Nodes */
+      .drama-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .drama-card {
+        background-color: var(--bg-surface);
+        border-radius: var(--radius-card);
+        padding: 14px 16px;
+        box-shadow: var(--shadow-card);
+        border: 1px solid var(--border-hairline);
+        transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 180ms ease;
+        animation: cardEnter 220ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      @keyframes cardEnter {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Level 1: Collapsed/Parent Tree Header */
+      .tree-row-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .tree-toggle-btn {
+        min-width: 40px;
+        min-height: 44px;
+        border-radius: 11px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        background-color: var(--bg-subtle);
+        flex-shrink: 0;
+        transition: background-color 150ms ease, color 150ms ease, transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .tree-toggle-btn:hover {
+        background-color: var(--bg-hover);
+        color: var(--text-primary);
+      }
+
+      .tree-toggle-btn svg {
+        transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .drama-card.expanded .tree-toggle-btn {
+        background-color: var(--accent-soft);
+        color: var(--accent);
+      }
+
+      .drama-card.expanded .tree-toggle-btn svg {
+        transform: rotate(90deg);
+      }
+
+      .tree-main-info {
+        flex: 1;
+        min-width: 0;
+        cursor: pointer;
+        padding: 2px 0;
+      }
+
+      .card-title {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+        line-height: 1.35;
+        color: var(--text-primary);
+        word-break: break-word;
+      }
+
+      .tree-next-line {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 3px;
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+
+      .next-ep-chip {
+        font-weight: 700;
+        color: var(--accent);
+      }
+
+      .next-ep-chip.done {
+        color: var(--success);
+      }
+
+      .tree-platform-text {
+        color: var(--text-muted);
+        font-size: 12.5px;
+      }
+
+      .tree-quick-link {
+        min-height: 42px;
+        padding: 0 13px;
+        border-radius: 11px;
+        background-color: var(--accent);
+        color: var(--accent-text);
+        font-size: 13.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        text-decoration: none;
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: background-color 160ms ease, transform 120ms ease;
+      }
+
+      .tree-quick-link:hover {
+        background-color: var(--accent-hover);
+      }
+
+      .tree-quick-link:active {
+        transform: scale(0.96);
+      }
+
+      .tree-quick-link.no-url {
+        background-color: var(--bg-subtle);
+        color: var(--text-secondary);
+      }
+
+      .tree-quick-link.no-url:hover {
+        background-color: var(--bg-hover);
+        color: var(--text-primary);
+      }
+
+      /* Level 2: Expanded Tree Branch */
+      .tree-branch {
+        display: none;
+        position: relative;
+        margin-top: 12px;
+        margin-left: 19px;
+        padding-left: 20px;
+        padding-top: 6px;
+      }
+
+      .drama-card.expanded .tree-branch {
+        display: block;
+        animation: branchExpand 200ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      @keyframes branchExpand {
+        from {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Tree Stem & Horizontal Arm */
+      .tree-branch::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 14px;
+        width: 2px;
+        background-color: var(--border-strong);
+        border-radius: 2px;
+      }
+
+      .tree-branch-node {
+        position: relative;
+        padding-top: 8px;
+        border-top: 1px solid var(--border-hairline);
+      }
+
+      .tree-branch-node::before {
+        content: '';
+        position: absolute;
+        left: -20px;
+        top: 22px;
+        width: 14px;
+        height: 2px;
+        background-color: var(--border-strong);
+        border-radius: 2px;
+      }
+
+      .branch-meta-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .mode-tag {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        background-color: var(--bg-subtle);
+        padding: 4px 9px;
+        border-radius: 8px;
+      }
+
+      .card-meta-time {
+        font-size: 12.5px;
+        color: var(--text-muted);
+      }
+
+      /* Platform Badge */
+      .platform-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        flex-shrink: 0;
+        letter-spacing: 0.01em;
+      }
+
+      .platform-youtube {
+        background-color: rgba(239, 68, 68, 0.12);
+        color: #D92D20;
+      }
+      html.dark .platform-youtube {
+        background-color: rgba(248, 113, 113, 0.16);
+        color: #FCA5A5;
+      }
+
+      .platform-bilibili {
+        background-color: rgba(251, 114, 153, 0.14);
+        color: #D64572;
+      }
+      html.dark .platform-bilibili {
+        background-color: rgba(251, 114, 153, 0.18);
+        color: #FDA4BF;
+      }
+
+      .platform-netflix {
+        background-color: rgba(229, 9, 20, 0.11);
+        color: #B81D24;
+      }
+      html.dark .platform-netflix {
+        background-color: rgba(229, 9, 20, 0.20);
+        color: #F87171;
+      }
+
+      .platform-iqiyi {
+        background-color: rgba(16, 185, 129, 0.13);
+        color: #0D8A5E;
+      }
+      html.dark .platform-iqiyi {
+        background-color: rgba(52, 211, 153, 0.16);
+        color: #6EE7B7;
+      }
+
+      .platform-disney {
+        background-color: rgba(37, 99, 235, 0.12);
+        color: #1D4ED8;
+      }
+      html.dark .platform-disney {
+        background-color: rgba(96, 165, 250, 0.18);
+        color: #93C5FD;
+      }
+
+      .platform-friday {
+        background-color: rgba(234, 88, 12, 0.12);
+        color: #C2410C;
+      }
+      html.dark .platform-friday {
+        background-color: rgba(251, 146, 60, 0.18);
+        color: #FDBA74;
+      }
+
+      .platform-linetv {
+        background-color: rgba(22, 163, 74, 0.12);
+        color: #15803D;
+      }
+      html.dark .platform-linetv {
+        background-color: rgba(74, 222, 128, 0.16);
+        color: #86EFAC;
+      }
+
+      .platform-web {
+        background-color: var(--bg-subtle);
+        color: var(--text-secondary);
+      }
+
+      .platform-none {
+        background-color: transparent;
+        border: 1px dashed var(--border-strong);
+        color: var(--text-muted);
+      }
+
+      /* Progress Block */
+      .progress-block {
+        margin: 8px 0 12px;
+      }
+
+      .progress-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+
+      .episode-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .episode-label .ep-num {
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      .progress-pct {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+
+      .progress-track {
+        width: 100%;
+        height: 7px;
+        background-color: var(--bg-subtle);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        border-radius: 999px;
+        background-color: var(--accent);
+        transition: width 300ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .progress-fill.completed {
+        background-color: var(--success);
+      }
+
+      /* Season Mini Stepper inside Branch */
+      .season-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        background-color: var(--bg-page);
+        border: 1px solid var(--border-hairline);
+        margin-bottom: 12px;
+        font-size: 13.5px;
+      }
+
+      .season-bar-btns {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .btn-season-step {
+        min-height: 36px;
+        padding: 0 11px;
+        border-radius: 8px;
+        background-color: var(--bg-subtle);
+        color: var(--text-secondary);
+        font-size: 12.5px;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: background-color 140ms ease, color 140ms ease;
+      }
+
+      .btn-season-step:hover {
+        background-color: var(--accent-soft);
+        color: var(--accent);
+      }
+
+      /* Cozy Note */
+      .card-note {
+        background-color: var(--bg-subtle);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+        font-size: 13.5px;
+        line-height: 1.5;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        word-break: break-word;
+      }
+
+      .card-note-icon {
+        color: var(--accent);
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+
+      .branch-url-preview {
+        font-size: 12.5px;
+        color: var(--text-muted);
+        margin-bottom: 12px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* Card Actions inside Branch */
+      .card-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .ep-stepper-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .btn-minus-one {
+        min-height: 44px;
+        padding: 0 14px;
+        border-radius: var(--radius-btn);
+        background-color: var(--bg-subtle);
+        color: var(--text-secondary);
+        font-size: 14px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        transition: background-color 160ms ease, color 160ms ease, transform 120ms ease;
+      }
+
+      .btn-minus-one:hover {
+        background-color: var(--bg-hover);
+        color: var(--text-primary);
+      }
+
+      .btn-minus-one:active {
+        transform: scale(0.96);
+      }
+
+      .btn-plus-one {
+        min-height: 44px;
+        padding: 0 15px;
+        border-radius: var(--radius-btn);
+        background-color: var(--accent-soft);
+        color: var(--accent);
+        font-size: 14px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        white-space: nowrap;
+        transition: background-color 160ms ease, color 160ms ease, transform 120ms ease;
+      }
+
+      .btn-plus-one:hover {
+        background-color: var(--accent);
+        color: var(--accent-text);
+      }
+
+      .btn-plus-one:active {
+        transform: scale(0.96);
+      }
+
+      .btn-watch {
+        flex: 1 1 130px;
+        min-height: 44px;
+        padding: 0 14px;
+        border-radius: var(--radius-btn);
+        background-color: var(--accent);
+        color: var(--accent-text);
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background-color 160ms ease, transform 120ms ease;
+      }
+
+      .btn-watch:hover {
+        background-color: var(--accent-hover);
+      }
+
+      .btn-watch:active {
+        transform: scale(0.98);
+      }
+
+      .btn-watch.no-url {
+        background-color: var(--bg-subtle);
+        color: var(--text-secondary);
+      }
+
+      .btn-watch.no-url:hover {
+        background-color: var(--bg-hover);
+        color: var(--text-primary);
+      }
+
+      .card-secondary-btns {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        margin-left: auto;
+      }
+
+      .card-icon-btn {
+        min-width: 44px;
+        min-height: 44px;
+        border-radius: 11px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        transition: background-color 160ms ease, color 160ms ease, transform 120ms ease;
+      }
+
+      .card-icon-btn:hover {
+        background-color: var(--bg-subtle);
+        color: var(--text-primary);
+      }
+
+      .card-icon-btn.complete-btn:hover {
+        background-color: var(--success-soft);
+        color: var(--success);
+      }
+
+      .card-icon-btn.delete-btn:hover {
+        background-color: var(--danger-soft);
+        color: var(--danger);
+      }
+
+      /* Form Episode Mode Selector */
+      .mode-selector {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .mode-option {
+        min-height: 44px;
+        padding: 8px 10px;
+        border-radius: 11px;
+        border: 1px solid var(--border-strong);
+        background-color: var(--bg-page);
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        white-space: nowrap;
+        transition: all 150ms ease;
+      }
+
+      .mode-option.selected {
+        border-color: var(--accent);
+        background-color: var(--accent-soft);
+        color: var(--accent);
+      }
+
+      .form-row-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+      }
+
+      @media (max-width: 460px) {
+        .tree-quick-link {
+          padding: 0 10px;
+          font-size: 13px;
+        }
+        .form-row-3 {
+          grid-template-columns: 1fr 1fr;
+        }
+        .form-row-3 > .form-group:last-child {
+          grid-column: span 2;
+        }
+      }
+
+      /* Empty State */
+      .empty-state {
+        text-align: center;
+        padding: 48px 20px;
+        background-color: var(--bg-surface);
+        border-radius: var(--radius-card);
+        border: 1px dashed var(--border-strong);
+      }
+
+      .empty-illustration {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 14px;
+        border-radius: 18px;
+        background-color: var(--accent-soft);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .empty-title {
+        margin: 0 0 6px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .empty-desc {
+        margin: 0 0 20px;
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      /* Mobile Floating Add Button */
+      .mobile-fab {
+        display: none;
+      }
+
+      @media (max-width: 640px) {
+        .toolbar .btn-add-desktop {
+          display: none;
+        }
+
+        .mobile-fab {
+          position: fixed;
+          right: 18px;
+          bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+          z-index: 25;
+          height: 52px;
+          padding: 0 20px;
+          border-radius: 999px;
+          background-color: var(--accent);
+          color: var(--accent-text);
+          font-size: 15px;
+          font-weight: 600;
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          box-shadow: 0 8px 24px -4px rgba(217, 119, 87, 0.48);
+          transition: transform 140ms ease, background-color 160ms ease;
+        }
+
+        .mobile-fab:active {
+          transform: scale(0.95);
+        }
+      }
+
+      /* Modals */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        background-color: rgba(24, 20, 17, 0.54);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        opacity: 0;
+        transition: opacity 180ms ease;
+      }
+
+      .modal-backdrop.open {
+        display: flex;
+        opacity: 1;
+      }
+
+      .modal-card {
+        width: 100%;
+        max-width: 480px;
+        max-height: 90dvh;
+        overflow-y: auto;
+        background-color: var(--bg-surface);
+        border-radius: 20px;
+        padding: 22px;
+        box-shadow: var(--shadow-modal);
+        border: 1px solid var(--border-hairline);
+        animation: modalPop 200ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      @keyframes modalPop {
+        from {
+          opacity: 0;
+          transform: translateY(12px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @media (max-width: 640px) {
+        .modal-backdrop {
+          align-items: flex-end;
+          padding: 0;
+        }
+
+        .modal-card {
+          max-width: 100%;
+          border-radius: 22px 22px 0 0;
+          padding: 20px 18px calc(22px + env(safe-area-inset-bottom, 0px));
+          animation: sheetSlideUp 220ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes sheetSlideUp {
+          from {
+            opacity: 0;
+            transform: translateY(28px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      }
+
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .modal-title {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .form-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+      }
+
+      .required-mark {
+        color: var(--accent);
+        margin-left: 2px;
+      }
+
+      .form-control {
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 13px;
+        border-radius: var(--radius-input);
+        border: 1px solid var(--border-strong);
+        background-color: var(--bg-page);
+        font-size: 15px;
+        color: var(--text-primary);
+        transition: border-color 160ms ease, box-shadow 160ms ease;
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+      }
+
+      textarea.form-control {
+        min-height: 84px;
+        resize: vertical;
+        line-height: 1.5;
+      }
+
+      .status-selector {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .status-option {
+        min-height: 44px;
+        padding: 8px 6px;
+        border-radius: 11px;
+        border: 1px solid var(--border-strong);
+        background-color: var(--bg-page);
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        white-space: nowrap;
+        transition: all 150ms ease;
+      }
+
+      .status-option.selected {
+        border-color: var(--accent);
+        background-color: var(--accent-soft);
+        color: var(--accent);
+      }
+
+      .modal-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .btn-secondary {
+        min-height: 46px;
+        padding: 0 18px;
+        border-radius: var(--radius-btn);
+        background-color: var(--bg-subtle);
+        color: var(--text-secondary);
+        font-size: 14.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        white-space: nowrap;
+        transition: background-color 150ms ease, color 150ms ease;
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--bg-hover);
+        color: var(--text-primary);
+      }
+
+      .btn-danger {
+        min-height: 46px;
+        padding: 0 18px;
+        border-radius: var(--radius-btn);
+        background-color: var(--danger);
+        color: #FFFFFF;
+        font-size: 14.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        white-space: nowrap;
+      }
+
+      .btn-full {
+        flex: 1;
+      }
+
+      .helper-text {
+        margin-top: 6px;
+        font-size: 12.5px;
+        color: var(--text-muted);
+      }
+
+      .next-ep-highlight {
+        background-color: var(--accent-soft);
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .next-ep-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--accent);
+      }
+
+      .next-ep-sub {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-top: 2px;
+      }
+
+      .checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 44px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        background-color: var(--bg-subtle);
+        margin-top: 12px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+
+      .checkbox-row input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--accent);
+      }
+
+      /* Toast */
+      .toast-container {
+        position: fixed;
+        left: 50%;
+        bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+        transform: translateX(-50%);
+        z-index: 80;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        pointer-events: none;
+        width: calc(100% - 32px);
+        max-width: 440px;
+      }
+
+      @media (min-width: 641px) {
+        .toast-container {
+          bottom: 24px;
+        }
+      }
+
+      .toast {
+        pointer-events: auto;
+        background-color: #332E2B;
+        color: #FAF7F2;
+        padding: 11px 16px;
+        border-radius: 12px;
+        font-size: 13.5px;
+        font-weight: 500;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        animation: toastIn 180ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      html.dark .toast {
+        background-color: #F2ECE4;
+        color: #1E1B18;
+      }
+
+      @keyframes toastIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Offline Banner */
+      .offline-banner {
+        display: none;
+        background-color: var(--accent-soft);
+        color: var(--accent);
+        text-align: center;
+        font-size: 12.5px;
+        font-weight: 600;
+        padding: 6px 12px;
+        border-bottom: 1px solid var(--border-hairline);
+      }
+
+      .offline-banner.visible {
+        display: block;
+      }
+
+      /* iOS Guide Steps */
+      .ios-step {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 12px;
+        background-color: var(--bg-subtle);
+        margin-bottom: 10px;
+        font-size: 14px;
+        color: var(--text-primary);
+      }
+
+      .ios-step-num {
+        width: 26px;
+        height: 26px;
+        border-radius: 999px;
+        background-color: var(--accent);
+        color: #FFFFFF;
+        font-size: 13px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="offlineBanner" class="offline-banner" role="status">
+      目前處於離線模式 — 您的追劇筆記仍可正常瀏覽與編輯
+    </div>
+
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="brand">
+          <div class="brand-icon" aria-hidden="true">
+            <svg viewBox="0 0 64 64" width="34" height="34" xmlns="http://www.w3.org/2000/svg">
+              <rect width="64" height="64" rx="14" fill="#D97757" />
+              <!-- Cute Cozy TV + Popcorn Silhouette -->
+              <path d="M22 14 L30 22 M42 14 L34 22" stroke="#FAF7F2" stroke-width="3.5" stroke-linecap="round" />
+              <rect x="12" y="21" width="40" height="30" rx="8" fill="#FAF7F2" />
+              <rect x="17" y="26" width="23" height="20" rx="4" fill="#332E2B" />
+              <!-- Play triangle -->
+              <path d="M26 31.5 L34 36 L26 40.5 Z" fill="#D97757" />
+              <!-- TV Dials -->
+              <circle cx="45.5" cy="31" r="2.2" fill="#6B5B53" />
+              <circle cx="45.5" cy="39" r="2.2" fill="#6B5B53" />
+            </svg>
+          </div>
+          <h1 class="brand-title">溫馨追劇筆記</h1>
+        </div>
+
+        <div class="header-actions">
+          <button type="button" id="pwaInstallBtn" class="pwa-install-btn hidden" aria-label="安裝應用程式">
+            <i data-lucide="smartphone" width="16" height="16"></i>
+            <span>安裝 App</span>
+          </button>
+
+          <button type="button" id="exportBtn" class="icon-btn" title="匯出備份 (.json)" aria-label="匯出備份 (.json)">
+            <i data-lucide="download" width="20" height="20"></i>
+          </button>
+
+          <button type="button" id="importBtn" class="icon-btn" title="匯入還原 (.json)" aria-label="匯入還原 (.json)">
+            <i data-lucide="upload" width="20" height="20"></i>
+          </button>
+          <input type="file" id="importFileInput" accept=".json,application/json" style="display: none" />
+
+          <button type="button" id="themeToggleBtn" class="icon-btn" title="切換深淺色模式" aria-label="切換深淺色模式">
+            <i data-lucide="moon" id="themeIconMoon" width="20" height="20"></i>
+            <i data-lucide="sun" id="themeIconSun" width="20" height="20" style="display: none"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- Status Tabs -->
+      <nav class="tabs-wrapper" role="tablist" aria-label="追劇狀態分類">
+        <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-tab="watching">
+          <span>🍿 正在追</span>
+          <span class="tab-count tabular-nums" id="count-watching">0</span>
+        </button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="plan">
+          <span>📌 待看清單</span>
+          <span class="tab-count tabular-nums" id="count-plan">0</span>
+        </button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="completed">
+          <span>✨ 已完食</span>
+          <span class="tab-count tabular-nums" id="count-completed">0</span>
+        </button>
+      </nav>
+
+      <!-- Search & Add Toolbar -->
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon" aria-hidden="true">
+            <i data-lucide="search" width="17" height="17"></i>
+          </span>
+          <input
+            type="search"
+            id="searchInput"
+            class="search-input"
+            placeholder="搜尋劇名或溫馨備註..."
+            aria-label="搜尋劇名或溫馨備註"
+          />
+          <button type="button" id="searchClearBtn" class="search-clear" aria-label="清除搜尋">
+            <i data-lucide="x" width="16" height="16"></i>
+          </button>
+        </div>
+        <button type="button" id="addDramaDesktopBtn" class="btn-primary btn-add-desktop">
+          <i data-lucide="plus" width="18" height="18"></i>
+          <span>新增劇集</span>
+        </button>
+      </div>
+
+      <!-- Tree Controls Bar -->
+      <div class="tree-controls" id="treeControlsBar">
+        <span class="tree-summary" id="treeSummaryText">點擊劇集可展開樹狀明細</span>
+        <div class="tree-bulk-btns">
+          <button type="button" id="expandAllBtn" class="btn-tree-bulk">
+            <i data-lucide="chevrons-down" width="15" height="15"></i>
+            <span>全開</span>
+          </button>
+          <button type="button" id="collapseAllBtn" class="btn-tree-bulk">
+            <i data-lucide="chevrons-up" width="15" height="15"></i>
+            <span>全收</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Drama Cards Container -->
+      <section id="dramaList" class="drama-list" aria-live="polite"></section>
+    </main>
+
+    <!-- Mobile Thumb-Friendly Floating Add Button -->
+    <button type="button" id="addDramaMobileBtn" class="mobile-fab" aria-label="新增劇集">
+      <i data-lucide="plus" width="20" height="20"></i>
+      <span>新增劇集</span>
+    </button>
+
+    <!-- Add / Edit Drama Modal -->
+    <div id="dramaModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="dramaModalTitle">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 id="dramaModalTitle" class="modal-title">新增追劇紀錄</h2>
+          <button type="button" class="icon-btn" id="closeDramaModalBtn" aria-label="關閉視窗">
+            <i data-lucide="x" width="20" height="20"></i>
+          </button>
+        </div>
+
+        <form id="dramaForm" novalidate>
+          <input type="hidden" id="formDramaId" />
+
+          <div class="form-group">
+            <label for="formTitle" class="form-label">
+              <span>劇名 <span class="required-mark">*</span></span>
+            </label>
+            <input
+              type="text"
+              id="formTitle"
+              class="form-control"
+              placeholder="例如：請回答 1988、葬送的芙莉蓮"
+              required
+              maxlength="100"
+            />
+          </div>
+
+          <div class="form-group">
+            <span class="form-label">集數類型</span>
+            <div class="mode-selector" id="formEpisodeModeSelector">
+              <button type="button" class="mode-option selected" data-mode="single">
+                <span>🎬 單集制（第 X 集）</span>
+              </button>
+              <button type="button" class="mode-option" data-mode="season">
+                <span>📺 多季制（X季X集）</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-row-2" id="formEpisodeGrid">
+            <div class="form-group" id="formSeasonGroup" style="display: none">
+              <label for="formSeason" class="form-label">第幾季</label>
+              <input
+                type="number"
+                id="formSeason"
+                class="form-control tabular-nums"
+                min="1"
+                step="1"
+                value="1"
+                inputmode="numeric"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="formCurrentEp" class="form-label" id="formCurrentEpLabel">已看到第幾集</label>
+              <input
+                type="number"
+                id="formCurrentEp"
+                class="form-control tabular-nums"
+                min="0"
+                step="1"
+                value="1"
+                inputmode="numeric"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="formTotalEp" class="form-label" id="formTotalEpLabel">總集數（選填）</label>
+              <input
+                type="number"
+                id="formTotalEp"
+                class="form-control tabular-nums"
+                min="1"
+                step="1"
+                placeholder="例如：24"
+                inputmode="numeric"
+              />
+            </div>
+          </div>
+          <div class="helper-text" style="margin-top: -8px; margin-bottom: 14px">
+            主頁第一層會自動計算下一集（例如已看 0 集 → 下集：第 1 集）
+          </div>
+
+          <div class="form-group">
+            <label for="formUrl" class="form-label">
+              <span>下一集／目前觀看連結</span>
+              <span id="formPlatformPreview"></span>
+            </label>
+            <input
+              type="url"
+              id="formUrl"
+              class="form-control"
+              placeholder="貼上 YouTube、Bilibili、Netflix 等網址..."
+              inputmode="url"
+            />
+            <div class="helper-text">貼上網址後會自動辨識影音平台標籤</div>
+          </div>
+
+          <div class="form-group">
+            <span class="form-label">追劇狀態</span>
+            <div class="status-selector" id="formStatusSelector">
+              <button type="button" class="status-option selected" data-status="watching">🍿 正在追</button>
+              <button type="button" class="status-option" data-status="plan">📌 待看清單</button>
+              <button type="button" class="status-option" data-status="completed">✨ 已完食</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="formNote" class="form-label">溫馨小備註（選填）</label>
+            <textarea
+              id="formNote"
+              class="form-control"
+              placeholder="例如：第5集超好哭、記得準備面紙與熱可可..."
+              maxlength="400"
+            ></textarea>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" id="cancelDramaModalBtn">取消</button>
+            <button type="submit" class="btn-primary btn-full">儲存筆記</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- +1 Episode Next URL Prompt Modal -->
+    <div id="nextEpModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="nextEpModalTitle">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 id="nextEpModalTitle" class="modal-title">進度已推進！</h2>
+          <button type="button" class="icon-btn" id="closeNextEpModalBtn" aria-label="略過並關閉">
+            <i data-lucide="x" width="20" height="20"></i>
+          </button>
+        </div>
+
+        <div class="next-ep-highlight">
+          <div>
+            <div class="next-ep-title" id="nextEpProgressLabel">已更新至第 2 集</div>
+            <div class="next-ep-sub" id="nextEpShowTitle">劇名</div>
+          </div>
+          <span style="font-size: 26px" aria-hidden="true">☕</span>
+        </div>
+
+        <form id="nextEpForm">
+          <input type="hidden" id="nextEpDramaId" />
+          <div class="form-group">
+            <label for="nextEpUrlInput" class="form-label">
+              <span>要順便更新下一集的網址嗎？</span>
+              <span id="nextEpPlatformPreview"></span>
+            </label>
+            <input
+              type="url"
+              id="nextEpUrlInput"
+              class="form-control"
+              placeholder="貼上新的集數網址，或保留原本連結..."
+              inputmode="url"
+            />
+            <div class="helper-text" id="nextEpOldUrlHint"></div>
+          </div>
+
+          <label class="checkbox-row" id="markCompletedRow" style="display: none">
+            <input type="checkbox" id="markCompletedCheckbox" />
+            <span>已看到最後一集了！順便移至「✨ 已完食」</span>
+          </label>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" id="skipNextEpBtn">略過</button>
+            <button type="submit" class="btn-primary btn-full">更新網址</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+      <div class="modal-card" style="max-width: 400px">
+        <div class="modal-header">
+          <h2 id="deleteModalTitle" class="modal-title">確定要刪除嗎？</h2>
+          <button type="button" class="icon-btn" id="closeDeleteModalBtn" aria-label="關閉">
+            <i data-lucide="x" width="20" height="20"></i>
+          </button>
+        </div>
+        <p id="deleteModalMessage" style="margin: 0 0 8px; color: var(--text-secondary); font-size: 14.5px"></p>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="cancelDeleteBtn">保留</button>
+          <button type="button" class="btn-danger btn-full" id="confirmDeleteBtn">確定刪除</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Import Choice Modal -->
+    <div id="importModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+      <div class="modal-card" style="max-width: 420px">
+        <div class="modal-header">
+          <h2 id="importModalTitle" class="modal-title">匯入追劇備份</h2>
+          <button type="button" class="icon-btn" id="closeImportModalBtn" aria-label="關閉">
+            <i data-lucide="x" width="20" height="20"></i>
+          </button>
+        </div>
+        <p id="importModalSummary" style="margin: 0 0 16px; color: var(--text-secondary); font-size: 14.5px"></p>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <button type="button" class="btn-primary btn-full" id="importMergeBtn">合併至現有清單（保留目前紀錄）</button>
+          <button type="button" class="btn-secondary btn-full" id="importReplaceBtn">完全覆蓋還原（取代目前清單）</button>
+          <button type="button" class="btn-secondary btn-full" id="cancelImportBtn">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- iOS Install Guide Modal -->
+    <div id="iosInstallModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="iosInstallTitle">
+      <div class="modal-card" style="max-width: 400px">
+        <div class="modal-header">
+          <h2 id="iosInstallTitle" class="modal-title">安裝到 iPhone / iPad 主畫面</h2>
+          <button type="button" class="icon-btn" id="closeIosInstallBtn" aria-label="關閉">
+            <i data-lucide="x" width="20" height="20"></i>
+          </button>
+        </div>
+        <div class="ios-step">
+          <span class="ios-step-num">1</span>
+          <span>點擊 Safari 瀏覽器工具列的 <strong>「分享」</strong> 按鈕（方框向上箭頭圖示）</span>
+        </div>
+        <div class="ios-step">
+          <span class="ios-step-num">2</span>
+          <span>往下滑動選單，點擊 <strong>「加入主畫面」</strong> 即可像 App 一樣全螢幕開啟</span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-primary btn-full" id="doneIosInstallBtn">我知道了</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <script>
+      (function () {
+        'use strict';
+
+        var STORAGE_KEY = 'cozy_drama_notes_v1';
+        var INIT_FLAG_KEY = 'cozy_drama_notes_initialized_v1';
+        var THEME_KEY = 'cozy_drama_theme_v1';
+
+        /* =========================================================
+           1. SVG Icon & Dynamic PWA Manifest / Service Worker
+           ========================================================= */
+        var appSvgString =
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">' +
+          '<rect width="512" height="512" rx="112" fill="#D97757"/>' +
+          '<path d="M180 118 L242 180 M332 118 L270 180" stroke="#FAF7F2" stroke-width="26" stroke-linecap="round"/>' +
+          '<rect x="96" y="172" width="320" height="236" rx="56" fill="#FAF7F2"/>' +
+          '<rect x="136" y="212" width="184" height="156" rx="28" fill="#332E2B"/>' +
+          '<path d="M206 254 L270 290 L206 326 Z" fill="#D97757"/>' +
+          '<circle cx="364" cy="252" r="18" fill="#6B5B53"/>' +
+          '<circle cx="364" cy="316" r="18" fill="#6B5B53"/>' +
+          '</svg>';
+
+        var svgDataUri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(appSvgString);
+
+        function createPngIconDataUrl(size, maskable) {
+          return new Promise(function (resolve) {
+            try {
+              var canvas = document.createElement('canvas');
+              canvas.width = size;
+              canvas.height = size;
+              var ctx = canvas.getContext('2d');
+              if (!ctx) {
+                resolve(svgDataUri);
+                return;
+              }
+              if (maskable) {
+                ctx.fillStyle = '#D97757';
+                ctx.fillRect(0, 0, size, size);
+              }
+              var img = new Image();
+              img.onload = function () {
+                var pad = maskable ? Math.round(size * 0.14) : 0;
+                ctx.drawImage(img, pad, pad, size - pad * 2, size - pad * 2);
+                resolve(canvas.toDataURL('image/png'));
+              };
+              img.onerror = function () {
+                resolve(svgDataUri);
+              };
+              img.src = svgDataUri;
+            } catch (err) {
+              resolve(svgDataUri);
+            }
+          });
+        }
+
+        function setupPWA() {
+          var faviconEl = document.getElementById('appFavicon');
+          if (faviconEl) faviconEl.setAttribute('href', svgDataUri);
+
+          Promise.all([
+            createPngIconDataUrl(180, false),
+            createPngIconDataUrl(192, false),
+            createPngIconDataUrl(512, false),
+            createPngIconDataUrl(512, true),
+          ]).then(function (icons) {
+            var appleIcon = document.getElementById('appleTouchIcon');
+            if (appleIcon) appleIcon.setAttribute('href', icons[0]);
+
+            var pageUrl = window.location.href.split('#')[0].split('?')[0];
+            var baseScope = pageUrl.replace(/[^/]*$/, '');
+            var manifestObj = {
+              id: baseScope,
+              name: '溫馨追劇進度筆記',
+              short_name: '追劇筆記',
+              description: '深夜追劇咖啡廳風格的個人追劇進度筆記',
+              start_url: pageUrl,
+              scope: baseScope,
+              display: 'standalone',
+              theme_color: document.documentElement.classList.contains('dark') ? '#1E1B18' : '#FAF7F2',
+              background_color: document.documentElement.classList.contains('dark') ? '#1E1B18' : '#FAF7F2',
+              icons: [
+                { src: icons[1], sizes: '192x192', type: 'image/png', purpose: 'any' },
+                { src: icons[2], sizes: '512x512', type: 'image/png', purpose: 'any' },
+                { src: icons[3], sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+              ],
+            };
+
+            try {
+              var manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
+              var manifestUrl = URL.createObjectURL(manifestBlob);
+              var manifestLink = document.getElementById('appManifestLink');
+              if (manifestLink) manifestLink.setAttribute('href', manifestUrl);
+            } catch (e) {}
+          });
+
+          // Register Service Worker (works on GitHub Pages HTTPS and localhost; silent fallback if standalone HTML without sw.js)
+          if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
+            navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(function () {});
+          }
+        }
+
+        /* =========================================================
+           2. State & Sample Seed Data
+           ========================================================= */
+        var currentTab = 'watching';
+        var searchQuery = '';
+        var dramas = [];
+        var expandedIds = {};
+        var pendingImportDramas = null;
+        var deleteTargetId = null;
+        var deferredInstallPrompt = null;
+
+        function generateId() {
+          if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            return crypto.randomUUID();
+          }
+          return 'd_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+        }
+
+        function createSampleDramas() {
+          var now = Date.now();
+          return [
+            {
+              id: generateId(),
+              title: '機智醫生生活',
+              episodeMode: 'season',
+              season: 2,
+              currentEpisode: 5,
+              totalEpisode: 12,
+              url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+              status: 'watching',
+              note: '五人幫練團片段百看不厭，每集都又笑又暖。',
+              updatedAt: now - 1000 * 60 * 35,
+            },
+            {
+              id: generateId(),
+              title: '葬送的芙莉蓮',
+              episodeMode: 'single',
+              season: 1,
+              currentEpisode: 14,
+              totalEpisode: 28,
+              url: 'https://www.bilibili.com/bangumi/play/ep779282',
+              status: 'watching',
+              note: '配樂與節奏超療癒，深夜關燈配熱紅茶看最舒服。',
+              updatedAt: now - 1000 * 60 * 60 * 5,
+            },
+          ];
+        }
+
+        function normalizeDramaRecord(item) {
+          var mode = item.episodeMode === 'season' ? 'season' : 'single';
+          var seasonNum = Math.max(1, parseInt(item.season, 10) || 1);
+          var curEp = Math.max(0, parseInt(item.currentEpisode, 10) || 0);
+          var totEp = item.totalEpisode && parseInt(item.totalEpisode, 10) > 0 ? parseInt(item.totalEpisode, 10) : null;
+          return {
+            id: item.id || generateId(),
+            title: item.title || '',
+            episodeMode: mode,
+            season: seasonNum,
+            currentEpisode: curEp,
+            totalEpisode: totEp,
+            url: item.url || '',
+            status: item.status || 'watching',
+            note: item.note || '',
+            updatedAt: item.updatedAt || Date.now(),
+          };
+        }
+
+        function loadDramas() {
+          try {
+            var raw = localStorage.getItem(STORAGE_KEY);
+            var initialized = localStorage.getItem(INIT_FLAG_KEY);
+            if (raw) {
+              var parsed = JSON.parse(raw);
+              if (Array.isArray(parsed)) {
+                dramas = parsed.map(normalizeDramaRecord);
+                return;
+              }
+            }
+            if (!initialized) {
+              dramas = createSampleDramas();
+              saveDramas();
+              localStorage.setItem(INIT_FLAG_KEY, '1');
+            } else {
+              dramas = [];
+            }
+          } catch (e) {
+            dramas = createSampleDramas();
+          }
+        }
+
+        function saveDramas() {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(dramas));
+            localStorage.setItem(INIT_FLAG_KEY, '1');
+          } catch (e) {
+            showToast('儲存空間已滿，建議先匯出備份');
+          }
+        }
+
+        /* =========================================================
+           3. Helpers: Platform Detection, URL Sanitization, Time
+           ========================================================= */
+        function normalizeUrl(rawUrl) {
+          var trimmed = (rawUrl || '').trim();
+          if (!trimmed) return '';
+          if (/^https?:\/\//i.test(trimmed)) return trimmed;
+          return 'https://' + trimmed;
+        }
+
+        function isSafeUrl(url) {
+          if (!url) return false;
+          try {
+            var parsed = new URL(normalizeUrl(url));
+            return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+          } catch (e) {
+            return false;
+          }
+        }
+
+        function detectPlatform(url) {
+          var raw = (url || '').trim().toLowerCase();
+          if (!raw) {
+            return { name: '尚未設定連結', cls: 'platform-none', icon: 'link-2-off' };
+          }
+          if (raw.indexOf('youtube.com') !== -1 || raw.indexOf('youtu.be') !== -1) {
+            return { name: 'YouTube', cls: 'platform-youtube', icon: 'youtube' };
+          }
+          if (raw.indexOf('bilibili.com') !== -1 || raw.indexOf('b23.tv') !== -1) {
+            return { name: 'Bilibili', cls: 'platform-bilibili', icon: 'tv' };
+          }
+          if (raw.indexOf('netflix.com') !== -1) {
+            return { name: 'Netflix', cls: 'platform-netflix', icon: 'clapperboard' };
+          }
+          if (raw.indexOf('iq.com') !== -1 || raw.indexOf('iqiyi.com') !== -1) {
+            return { name: '愛奇藝', cls: 'platform-iqiyi', icon: 'play-circle' };
+          }
+          if (raw.indexOf('disneyplus.com') !== -1) {
+            return { name: 'Disney+', cls: 'platform-disney', icon: 'sparkles' };
+          }
+          if (raw.indexOf('friday.tw') !== -1) {
+            return { name: 'friDay影音', cls: 'platform-friday', icon: 'film' };
+          }
+          if (raw.indexOf('linetv') !== -1 || raw.indexOf('line.me') !== -1) {
+            return { name: 'LINE TV', cls: 'platform-linetv', icon: 'tv-2' };
+          }
+          return { name: '網頁連結', cls: 'platform-web', icon: 'globe' };
+        }
+
+        function formatRelativeTime(ts) {
+          if (!ts) return '剛剛';
+          var diff = Date.now() - ts;
+          if (diff < 60 * 1000) return '剛剛';
+          if (diff < 60 * 60 * 1000) return Math.floor(diff / (60 * 1000)) + ' 分鐘前';
+          if (diff < 24 * 60 * 60 * 1000) return Math.floor(diff / (60 * 60 * 1000)) + ' 小時前';
+          var d = new Date(ts);
+          var now = new Date();
+          var month = d.getMonth() + 1;
+          var day = d.getDate();
+          var hh = String(d.getHours()).padStart(2, '0');
+          var mm = String(d.getMinutes()).padStart(2, '0');
+          if (d.getFullYear() === now.getFullYear()) {
+            return month + '/' + day + ' ' + hh + ':' + mm;
+          }
+          return d.getFullYear() + '/' + month + '/' + day;
+        }
+
+        function escapeHtml(str) {
+          return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        var FALLBACK_ICONS = {
+          'smartphone': '<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>',
+          'download': '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
+          'upload': '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>',
+          'moon': '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+          'sun': '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+          'search': '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+          'x': '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+          'plus': '<path d="M5 12h14"/><path d="M12 5v14"/>',
+          'play': '<polygon points="6 3 20 12 6 21 6 3"/>',
+          'pencil': '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>',
+          'trash-2': '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
+          'check-circle-2': '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+          'popcorn': '<path d="M18 8a2 2 0 0 0 0-4 2 2 0 0 0-4 0 2 2 0 0 0-4 0 2 2 0 0 0-4 0 2 2 0 0 0 0 4"/><path d="M10 22 9 8"/><path d="m14 22 1-14"/><path d="M20 8c.5 0 .9.4.8 1l-2.6 12c-.1.5-.7 1-1.2 1H7c-.6 0-1.1-.4-1.2-1L3.2 9c-.1-.6.3-1 .8-1Z"/>',
+          'sticky-note': '<path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8Z"/><path d="M15 3v4a2 2 0 0 0 2 2h4"/>',
+          'youtube': '<path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/>',
+          'tv': '<rect width="20" height="15" x="2" y="7" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/>',
+          'tv-2': '<path d="M7 21h10"/><rect width="20" height="14" x="2" y="3" rx="2"/>',
+          'clapperboard': '<path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"/><path d="m6.2 5.3 3.1 3.9"/><path d="m12.4 3.4 3.1 4"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>',
+          'play-circle': '<circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>',
+          'sparkles': '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>',
+          'film': '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/>',
+          'globe': '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+          'link-2-off': '<path d="M9 17H7A5 5 0 0 1 7 7"/><path d="M15 7h2a5 5 0 0 1 4 8"/><line x1="8" x2="12" y1="12" y2="12"/><line x1="2" x2="22" y1="2" y2="22"/>',
+          'coffee': '<path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/>',
+          'search-x': '<path d="m13.5 8.5-5 5"/><path d="m8.5 8.5 5 5"/><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+          'bookmark': '<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>',
+          'chevron-right': '<path d="m9 18 6-6-6-6"/>',
+          'chevrons-down': '<path d="m7 6 5 5 5-5"/><path d="m7 13 5 5 5-5"/>',
+          'chevrons-up': '<path d="m17 11-5-5-5 5"/><path d="m17 18-5-5-5 5"/>',
+          'external-link': '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>'
+        };
+
+        function refreshIcons() {
+          if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+            return;
+          }
+          var nodes = document.querySelectorAll('i[data-lucide]');
+          for (var i = 0; i < nodes.length; i++) {
+            var el = nodes[i];
+            var name = el.getAttribute('data-lucide');
+            var paths = FALLBACK_ICONS[name];
+            if (!paths) continue;
+            var w = el.getAttribute('width') || '20';
+            var h = el.getAttribute('height') || '20';
+            var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', w);
+            svg.setAttribute('height', h);
+            svg.setAttribute('viewBox', '0 0 24 24');
+            svg.setAttribute('fill', 'none');
+            svg.setAttribute('stroke', 'currentColor');
+            svg.setAttribute('stroke-width', '2');
+            svg.setAttribute('stroke-linecap', 'round');
+            svg.setAttribute('stroke-linejoin', 'round');
+            svg.innerHTML = paths;
+            if (el.id) svg.id = el.id;
+            if (el.style && el.style.display) svg.style.display = el.style.display;
+            el.parentNode.replaceChild(svg, el);
+          }
+        }
+
+        /* =========================================================
+           4. Theme Toggle
+           ========================================================= */
+        function syncThemeUI() {
+          var isDark = document.documentElement.classList.contains('dark');
+          var moon = document.getElementById('themeIconMoon');
+          var sun = document.getElementById('themeIconSun');
+          var metaTheme = document.getElementById('metaThemeColor');
+          var metaApple = document.getElementById('metaAppleStatusBar');
+          if (moon && sun) {
+            moon.style.display = isDark ? 'none' : 'block';
+            sun.style.display = isDark ? 'block' : 'none';
+          }
+          if (metaTheme) {
+            metaTheme.setAttribute('content', isDark ? '#1E1B18' : '#FAF7F2');
+          }
+          if (metaApple) {
+            metaApple.setAttribute('content', isDark ? 'black-translucent' : 'default');
+          }
+        }
+
+        function toggleTheme() {
+          var isDark = document.documentElement.classList.toggle('dark');
+          try {
+            localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+          } catch (e) {}
+          syncThemeUI();
+        }
+
+        /* =========================================================
+           5. Toast Notifications
+           ========================================================= */
+        function showToast(message) {
+          var container = document.getElementById('toastContainer');
+          if (!container) return;
+          var toast = document.createElement('div');
+          toast.className = 'toast';
+          toast.textContent = message;
+          container.appendChild(toast);
+          setTimeout(function () {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(8px)';
+            toast.style.transition = 'opacity 180ms ease, transform 180ms ease';
+            setTimeout(function () {
+              if (toast.parentNode) toast.parentNode.removeChild(toast);
+            }, 200);
+          }, 2600);
+        }
+
+        /* =========================================================
+           6. Render Logic
+           ========================================================= */
+        function updateTabCounts() {
+          var counts = { watching: 0, plan: 0, completed: 0 };
+          for (var i = 0; i < dramas.length; i++) {
+            var st = dramas[i].status;
+            if (counts[st] !== undefined) counts[st]++;
+          }
+          document.getElementById('count-watching').textContent = counts.watching;
+          document.getElementById('count-plan').textContent = counts.plan;
+          document.getElementById('count-completed').textContent = counts.completed;
+        }
+
+        function renderPlatformBadgeHtml(url) {
+          var p = detectPlatform(url);
+          return (
+            '<span class="platform-badge ' +
+            p.cls +
+            '">' +
+            '<i data-lucide="' +
+            p.icon +
+            '" width="13" height="13"></i>' +
+            '<span>' +
+            escapeHtml(p.name) +
+            '</span>' +
+            '</span>'
+          );
+        }
+
+        function getFilteredDramas() {
+          var q = searchQuery.trim().toLowerCase();
+          return dramas
+            .filter(function (item) {
+              if (item.status !== currentTab) return false;
+              if (!q) return true;
+              var inTitle = (item.title || '').toLowerCase().indexOf(q) !== -1;
+              var inNote = (item.note || '').toLowerCase().indexOf(q) !== -1;
+              return inTitle || inNote;
+            })
+            .sort(function (a, b) {
+              return (b.updatedAt || 0) - (a.updatedAt || 0);
+            });
+        }
+
+        function formatEpisodeProgressLabel(d) {
+          var cur = Number(d.currentEpisode) || 0;
+          var tot = d.totalEpisode ? Number(d.totalEpisode) : null;
+          var season = Math.max(1, Number(d.season) || 1);
+          if (d.episodeMode === 'season') {
+            if (tot) {
+              return '第 ' + season + ' 季 · 第 <span class="ep-num">' + cur + '</span> / ' + tot + ' 集';
+            }
+            return '第 ' + season + ' 季 · 第 <span class="ep-num">' + cur + '</span> 集';
+          }
+          if (tot) {
+            return '第 <span class="ep-num">' + cur + '</span> / ' + tot + ' 集';
+          }
+          return '第 <span class="ep-num">' + cur + '</span> 集';
+        }
+
+        function formatNextEpisodeText(d) {
+          var cur = Number(d.currentEpisode) || 0;
+          var tot = d.totalEpisode ? Number(d.totalEpisode) : null;
+          var season = Math.max(1, Number(d.season) || 1);
+          var nextEp = cur + 1;
+
+          if (d.status === 'completed' || (tot && cur >= tot && d.status === 'completed')) {
+            if (d.episodeMode === 'season') {
+              return { text: '已完食 · 第 ' + season + ' 季', done: true };
+            }
+            return { text: tot ? '已完食 · 共 ' + tot + ' 集' : '已完食', done: true };
+          }
+
+          if (tot && cur >= tot) {
+            if (d.episodeMode === 'season') {
+              return { text: '第 ' + season + ' 季已追完（共 ' + tot + ' 集）', done: true };
+            }
+            return { text: '已追完（共 ' + tot + ' 集）', done: true };
+          }
+
+          if (d.episodeMode === 'season') {
+            return { text: '下集：第 ' + season + ' 季 第 ' + nextEp + ' 集', done: false };
+          }
+          return { text: '下集：第 ' + nextEp + ' 集', done: false };
+        }
+
+        function formatEpisodeShortPlain(d) {
+          var cur = Number(d.currentEpisode) || 0;
+          var tot = d.totalEpisode ? Number(d.totalEpisode) : null;
+          var season = Math.max(1, Number(d.season) || 1);
+          if (d.episodeMode === 'season') {
+            return tot ? '第 ' + season + ' 季 第 ' + cur + ' / ' + tot + ' 集' : '第 ' + season + ' 季 第 ' + cur + ' 集';
+          }
+          return tot ? '第 ' + cur + ' / ' + tot + ' 集' : '第 ' + cur + ' 集';
+        }
+
+        function renderDramas() {
+          updateTabCounts();
+
+          var listEl = document.getElementById('dramaList');
+          var controlsBar = document.getElementById('treeControlsBar');
+          var summaryEl = document.getElementById('treeSummaryText');
+          var q = searchQuery.trim().toLowerCase();
+          var filtered = getFilteredDramas();
+
+          if (controlsBar) {
+            controlsBar.style.display = filtered.length > 0 ? 'flex' : 'none';
+          }
+          if (summaryEl && filtered.length > 0) {
+            var expandedCount = 0;
+            for (var c = 0; c < filtered.length; c++) {
+              if (expandedIds[filtered[c].id]) expandedCount++;
+            }
+            summaryEl.textContent = '共 ' + filtered.length + ' 部 · 已展開 ' + expandedCount + ' 部';
+          }
+
+          if (filtered.length === 0) {
+            var emptyTitle = '這裡還沒有劇集紀錄';
+            var emptyDesc = '點選「新增劇集」，記錄今晚想看的片單吧！';
+            var emptyIcon = 'coffee';
+
+            if (q) {
+              emptyTitle = '找不到符合「' + escapeHtml(searchQuery.trim()) + '」的劇集';
+              emptyDesc = '試試看別的關鍵字，或清除搜尋條件。';
+              emptyIcon = 'search-x';
+            } else if (currentTab === 'plan') {
+              emptyTitle = '待看清單目前空空的';
+              emptyDesc = '把朋友推薦的好劇先存進來，週末不怕劇荒！';
+              emptyIcon = 'bookmark';
+            } else if (currentTab === 'completed') {
+              emptyTitle = '尚未有完食的劇集';
+              emptyDesc = '追完一部好劇後，可以一鍵移到這裡好好收藏。';
+              emptyIcon = 'sparkles';
+            }
+
+            listEl.innerHTML =
+              '<div class="empty-state">' +
+              '  <div class="empty-illustration"><i data-lucide="' +
+              emptyIcon +
+              '" width="28" height="28"></i></div>' +
+              '  <h3 class="empty-title">' +
+              emptyTitle +
+              '</h3>' +
+              '  <p class="empty-desc">' +
+              emptyDesc +
+              '</p>' +
+              (q
+                ? '<button type="button" class="btn-secondary" id="emptyClearSearchBtn">清除搜尋</button>'
+                : '<button type="button" class="btn-primary" id="emptyAddBtn"><i data-lucide="plus" width="18" height="18"></i><span>新增第一部劇</span></button>') +
+              '</div>';
+
+            var emptyAdd = document.getElementById('emptyAddBtn');
+            if (emptyAdd) emptyAdd.addEventListener('click', function () { openDramaModal(null); });
+            var emptyClear = document.getElementById('emptyClearSearchBtn');
+            if (emptyClear) emptyClear.addEventListener('click', clearSearch);
+
+            refreshIcons();
+            return;
+          }
+
+          var html = '';
+          for (var i = 0; i < filtered.length; i++) {
+            var d = filtered[i];
+            var isExpanded = !!expandedIds[d.id];
+            var cur = Number(d.currentEpisode) || 0;
+            var tot = d.totalEpisode ? Number(d.totalEpisode) : null;
+            var hasUrl = isSafeUrl(d.url);
+            var safeHref = hasUrl ? normalizeUrl(d.url) : '#';
+            var platform = detectPlatform(d.url);
+            var nextInfo = formatNextEpisodeText(d);
+
+            // Level 1 Quick Link
+            var level1LinkHtml = hasUrl
+              ? '<a href="' +
+                escapeHtml(safeHref) +
+                '" target="_blank" rel="noopener noreferrer" class="tree-quick-link" data-action="watch" data-id="' +
+                escapeHtml(d.id) +
+                '" title="開啟下一集觀看連結">' +
+                '  <i data-lucide="play" width="14" height="14"></i>' +
+                '  <span>連結</span>' +
+                '</a>'
+              : '<button type="button" class="tree-quick-link no-url" data-action="watch-empty" data-id="' +
+                escapeHtml(d.id) +
+                '" title="設定觀看連結">' +
+                '  <span>設連結</span>' +
+                '</button>';
+
+            // Level 2 Progress Bar
+            var progressHtml = '';
+            if (tot && tot > 0) {
+              var pct = Math.min(100, Math.max(0, Math.round((cur / tot) * 100)));
+              var isDone = cur >= tot || d.status === 'completed';
+              progressHtml =
+                '<div class="progress-block">' +
+                '  <div class="progress-header">' +
+                '    <span class="episode-label tabular-nums">已看到：' +
+                formatEpisodeProgressLabel(d) +
+                '</span>' +
+                '    <span class="progress-pct tabular-nums">' +
+                pct +
+                '%</span>' +
+                '  </div>' +
+                '  <div class="progress-track" role="progressbar" aria-valuenow="' +
+                pct +
+                '" aria-valuemin="0" aria-valuemax="100">' +
+                '    <div class="progress-fill' +
+                (isDone ? ' completed' : '') +
+                '" style="width:' +
+                pct +
+                '%"></div>' +
+                '  </div>' +
+                '</div>';
+            } else {
+              progressHtml =
+                '<div class="progress-block">' +
+                '  <div class="progress-header">' +
+                '    <span class="episode-label tabular-nums">已看到：' +
+                formatEpisodeProgressLabel(d) +
+                '</span>' +
+                '  </div>' +
+                '</div>';
+            }
+
+            // Season stepper inside Level 2 if season mode
+            var seasonBarHtml = '';
+            if (d.episodeMode === 'season') {
+              var sNum = Math.max(1, Number(d.season) || 1);
+              seasonBarHtml =
+                '<div class="season-bar">' +
+                '  <span class="tabular-nums"><strong>第 ' +
+                sNum +
+                ' 季</strong> 進度管理</span>' +
+                '  <div class="season-bar-btns">' +
+                '    <button type="button" class="btn-season-step" data-action="season-minus" data-id="' +
+                escapeHtml(d.id) +
+                '">-1 季</button>' +
+                '    <button type="button" class="btn-season-step" data-action="season-plus" data-id="' +
+                escapeHtml(d.id) +
+                '">+1 季</button>' +
+                '  </div>' +
+                '</div>';
+            }
+
+            var noteHtml = d.note
+              ? '<div class="card-note">' +
+                '  <span class="card-note-icon" aria-hidden="true"><i data-lucide="sticky-note" width="15" height="15"></i></span>' +
+                '  <span>' +
+                escapeHtml(d.note) +
+                '</span>' +
+                '</div>'
+              : '';
+
+            var urlPreviewHtml = hasUrl
+              ? '<div class="branch-url-preview" title="' +
+                escapeHtml(safeHref) +
+                '">連結：' +
+                escapeHtml(safeHref) +
+                '</div>'
+              : '';
+
+            var watchBtnHtml = hasUrl
+              ? '<a href="' +
+                escapeHtml(safeHref) +
+                '" target="_blank" rel="noopener noreferrer" class="btn-watch" data-action="watch" data-id="' +
+                escapeHtml(d.id) +
+                '">' +
+                '  <i data-lucide="play" width="16" height="16"></i>' +
+                '  <span>繼續觀看</span>' +
+                '</a>'
+              : '<button type="button" class="btn-watch no-url" data-action="watch-empty" data-id="' +
+                escapeHtml(d.id) +
+                '">' +
+                '  <i data-lucide="play" width="16" height="16"></i>' +
+                '  <span>設定連結</span>' +
+                '</button>';
+
+            var quickMoveBtnHtml = '';
+            if (d.status === 'watching') {
+              quickMoveBtnHtml =
+                '<button type="button" class="card-icon-btn complete-btn" data-action="mark-completed" data-id="' +
+                escapeHtml(d.id) +
+                '" title="一鍵移至已完食" aria-label="一鍵移至已完食">' +
+                '  <i data-lucide="check-circle-2" width="19" height="19"></i>' +
+                '</button>';
+            } else if (d.status === 'plan') {
+              quickMoveBtnHtml =
+                '<button type="button" class="card-icon-btn complete-btn" data-action="start-watching" data-id="' +
+                escapeHtml(d.id) +
+                '" title="移至正在追" aria-label="移至正在追">' +
+                '  <i data-lucide="popcorn" width="19" height="19"></i>' +
+                '</button>';
+            }
+
+            html +=
+              '<article class="drama-card' +
+              (isExpanded ? ' expanded' : '') +
+              '" data-id="' +
+              escapeHtml(d.id) +
+              '">' +
+              '  <div class="tree-row-header">' +
+              '    <button type="button" class="tree-toggle-btn" data-action="toggle-expand" data-id="' +
+              escapeHtml(d.id) +
+              '" aria-expanded="' +
+              (isExpanded ? 'true' : 'false') +
+              '" aria-label="' +
+              (isExpanded ? '收合詳細資訊' : '展開詳細資訊') +
+              '">' +
+              '      <i data-lucide="chevron-right" width="18" height="18"></i>' +
+              '    </button>' +
+              '    <div class="tree-main-info" data-action="toggle-expand" data-id="' +
+              escapeHtml(d.id) +
+              '">' +
+              '      <h3 class="card-title">' +
+              escapeHtml(d.title) +
+              '</h3>' +
+              '      <div class="tree-next-line">' +
+              '        <span class="next-ep-chip tabular-nums' +
+              (nextInfo.done ? ' done' : '') +
+              '">' +
+              escapeHtml(nextInfo.text) +
+              '</span>' +
+              '        <span class="tree-platform-text">· ' +
+              escapeHtml(platform.name) +
+              '</span>' +
+              '      </div>' +
+              '    </div>' +
+              level1LinkHtml +
+              '  </div>' +
+              '  <div class="tree-branch">' +
+              '    <div class="tree-branch-node">' +
+              '      <div class="branch-meta-row">' +
+              renderPlatformBadgeHtml(d.url) +
+              '        <span class="mode-tag">' +
+              (d.episodeMode === 'season' ? 'X季X集' : '單集制') +
+              '</span>' +
+              '        <span class="card-meta-time">最後觀看：' +
+              escapeHtml(formatRelativeTime(d.updatedAt)) +
+              '</span>' +
+              '      </div>' +
+              progressHtml +
+              seasonBarHtml +
+              noteHtml +
+              urlPreviewHtml +
+              '      <div class="card-actions">' +
+              '        <div class="ep-stepper-group">' +
+              '          <button type="button" class="btn-minus-one tabular-nums" data-action="minus-one" data-id="' +
+              escapeHtml(d.id) +
+              '" title="集數 -1">-1 集</button>' +
+              '          <button type="button" class="btn-plus-one tabular-nums" data-action="plus-one" data-id="' +
+              escapeHtml(d.id) +
+              '" title="集數 +1">+1 集</button>' +
+              '        </div>' +
+              watchBtnHtml +
+              '        <div class="card-secondary-btns">' +
+              quickMoveBtnHtml +
+              '          <button type="button" class="card-icon-btn" data-action="edit" data-id="' +
+              escapeHtml(d.id) +
+              '" title="編輯" aria-label="編輯劇集">' +
+              '            <i data-lucide="pencil" width="18" height="18"></i>' +
+              '          </button>' +
+              '          <button type="button" class="card-icon-btn delete-btn" data-action="delete" data-id="' +
+              escapeHtml(d.id) +
+              '" title="刪除" aria-label="刪除劇集">' +
+              '            <i data-lucide="trash-2" width="18" height="18"></i>' +
+              '          </button>' +
+              '        </div>' +
+              '      </div>' +
+              '    </div>' +
+              '  </div>' +
+              '</article>';
+          }
+
+          listEl.innerHTML = html;
+          refreshIcons();
+        }
+
+        function toggleExpandDrama(id) {
+          if (expandedIds[id]) {
+            delete expandedIds[id];
+          } else {
+            expandedIds[id] = true;
+          }
+          renderDramas();
+        }
+
+        function expandAllDramas() {
+          var filtered = getFilteredDramas();
+          for (var i = 0; i < filtered.length; i++) {
+            expandedIds[filtered[i].id] = true;
+          }
+          renderDramas();
+        }
+
+        function collapseAllDramas() {
+          var filtered = getFilteredDramas();
+          for (var i = 0; i < filtered.length; i++) {
+            delete expandedIds[filtered[i].id];
+          }
+          renderDramas();
+        }
+
+        /* =========================================================
+           7. Modal Management & Actions
+           ========================================================= */
+        function openModal(id) {
+          var el = document.getElementById(id);
+          if (el) el.classList.add('open');
+        }
+
+        function closeModal(id) {
+          var el = document.getElementById(id);
+          if (el) el.classList.remove('open');
+        }
+
+        var selectedFormStatus = 'watching';
+        var selectedEpisodeMode = 'single';
+
+        function setFormStatus(status) {
+          selectedFormStatus = status;
+          var btns = document.querySelectorAll('#formStatusSelector .status-option');
+          for (var i = 0; i < btns.length; i++) {
+            var isMatch = btns[i].getAttribute('data-status') === status;
+            btns[i].classList.toggle('selected', isMatch);
+          }
+        }
+
+        function setFormEpisodeMode(mode) {
+          selectedEpisodeMode = mode === 'season' ? 'season' : 'single';
+          var btns = document.querySelectorAll('#formEpisodeModeSelector .mode-option');
+          for (var i = 0; i < btns.length; i++) {
+            var isMatch = btns[i].getAttribute('data-mode') === selectedEpisodeMode;
+            btns[i].classList.toggle('selected', isMatch);
+          }
+          var seasonGroup = document.getElementById('formSeasonGroup');
+          var epGrid = document.getElementById('formEpisodeGrid');
+          var curLabel = document.getElementById('formCurrentEpLabel');
+          var totLabel = document.getElementById('formTotalEpLabel');
+
+          if (selectedEpisodeMode === 'season') {
+            seasonGroup.style.display = 'block';
+            epGrid.className = 'form-row-3';
+            curLabel.textContent = '已看第幾集';
+            totLabel.textContent = '本季總集數';
+          } else {
+            seasonGroup.style.display = 'none';
+            epGrid.className = 'form-row-2';
+            curLabel.textContent = '已看到第幾集';
+            totLabel.textContent = '總集數（選填）';
+          }
+        }
+
+        function updateFormPlatformPreview() {
+          var urlVal = document.getElementById('formUrl').value;
+          var previewEl = document.getElementById('formPlatformPreview');
+          previewEl.innerHTML = urlVal.trim() ? renderPlatformBadgeHtml(urlVal) : '';
+          refreshIcons();
+        }
+
+        function openDramaModal(dramaId) {
+          var form = document.getElementById('dramaForm');
+          form.reset();
+
+          if (dramaId) {
+            var item = dramas.find(function (d) { return d.id === dramaId; });
+            if (!item) return;
+            document.getElementById('dramaModalTitle').textContent = '編輯追劇紀錄';
+            document.getElementById('formDramaId').value = item.id;
+            document.getElementById('formTitle').value = item.title || '';
+            setFormEpisodeMode(item.episodeMode || 'single');
+            document.getElementById('formSeason').value = item.season || 1;
+            document.getElementById('formCurrentEp').value = item.currentEpisode !== undefined ? item.currentEpisode : 1;
+            document.getElementById('formTotalEp').value = item.totalEpisode || '';
+            document.getElementById('formUrl').value = item.url || '';
+            document.getElementById('formNote').value = item.note || '';
+            setFormStatus(item.status || 'watching');
+          } else {
+            document.getElementById('dramaModalTitle').textContent = '新增追劇紀錄';
+            document.getElementById('formDramaId').value = '';
+            setFormEpisodeMode('single');
+            document.getElementById('formSeason').value = 1;
+            document.getElementById('formCurrentEp').value = 0;
+            document.getElementById('formTotalEp').value = '';
+            document.getElementById('formUrl').value = '';
+            document.getElementById('formNote').value = '';
+            setFormStatus(currentTab || 'watching');
+          }
+
+          updateFormPlatformPreview();
+          openModal('dramaModal');
+          setTimeout(function () {
+            document.getElementById('formTitle').focus();
+          }, 80);
+        }
+
+        function handleDramaFormSubmit(e) {
+          e.preventDefault();
+          var titleInput = document.getElementById('formTitle');
+          var title = titleInput.value.trim();
+          if (!title) {
+            showToast('請填寫劇名唷！');
+            titleInput.focus();
+            return;
+          }
+
+          var id = document.getElementById('formDramaId').value;
+          var seasonRaw = parseInt(document.getElementById('formSeason').value, 10);
+          var seasonNum = selectedEpisodeMode === 'season' ? (isNaN(seasonRaw) || seasonRaw < 1 ? 1 : seasonRaw) : 1;
+
+          var curEpRaw = parseInt(document.getElementById('formCurrentEp').value, 10);
+          var curEp = isNaN(curEpRaw) || curEpRaw < 0 ? 0 : curEpRaw;
+
+          var totEpRaw = parseInt(document.getElementById('formTotalEp').value, 10);
+          var totEp = !isNaN(totEpRaw) && totEpRaw > 0 ? totEpRaw : null;
+
+          var urlVal = document.getElementById('formUrl').value.trim();
+          if (urlVal && !isSafeUrl(urlVal)) {
+            showToast('請輸入有效的 http 或 https 網址');
+            document.getElementById('formUrl').focus();
+            return;
+          }
+
+          var noteVal = document.getElementById('formNote').value.trim();
+          var now = Date.now();
+
+          if (id) {
+            var idx = dramas.findIndex(function (d) { return d.id === id; });
+            if (idx !== -1) {
+              dramas[idx] = {
+                id: id,
+                title: title,
+                episodeMode: selectedEpisodeMode,
+                season: seasonNum,
+                currentEpisode: curEp,
+                totalEpisode: totEp,
+                url: urlVal ? normalizeUrl(urlVal) : '',
+                status: selectedFormStatus,
+                note: noteVal,
+                updatedAt: now,
+              };
+            }
+            showToast('已更新《' + title + '》');
+          } else {
+            var newId = generateId();
+            dramas.unshift({
+              id: newId,
+              title: title,
+              episodeMode: selectedEpisodeMode,
+              season: seasonNum,
+              currentEpisode: curEp,
+              totalEpisode: totEp,
+              url: urlVal ? normalizeUrl(urlVal) : '',
+              status: selectedFormStatus,
+              note: noteVal,
+              updatedAt: now,
+            });
+            showToast('已加入《' + title + '》');
+          }
+
+          saveDramas();
+          if (currentTab !== selectedFormStatus) {
+            switchTab(selectedFormStatus);
+          } else {
+            renderDramas();
+          }
+          closeModal('dramaModal');
+        }
+
+        /* =========================================================
+           8. +/- Episode, Season Stepper & Next URL Prompt
+           ========================================================= */
+        function handleMinusOne(dramaId) {
+          var idx = dramas.findIndex(function (d) { return d.id === dramaId; });
+          if (idx === -1) return;
+
+          var item = dramas[idx];
+          var cur = Number(item.currentEpisode) || 0;
+          if (cur <= 0) {
+            showToast('已經是第 0 集囉');
+            return;
+          }
+          item.currentEpisode = cur - 1;
+          item.updatedAt = Date.now();
+          saveDramas();
+          renderDramas();
+          showToast('已退回至 ' + formatEpisodeShortPlain(item));
+        }
+
+        function handleSeasonStep(dramaId, delta) {
+          var idx = dramas.findIndex(function (d) { return d.id === dramaId; });
+          if (idx === -1) return;
+
+          var item = dramas[idx];
+          var curSeason = Math.max(1, Number(item.season) || 1);
+          var nextSeason = curSeason + delta;
+          if (nextSeason < 1) {
+            showToast('已經是第 1 季囉');
+            return;
+          }
+          item.season = nextSeason;
+          if (delta > 0) {
+            item.currentEpisode = 0;
+          }
+          item.updatedAt = Date.now();
+          saveDramas();
+          renderDramas();
+          showToast(
+            delta > 0
+              ? '已切換至《' + item.title + '》第 ' + nextSeason + ' 季（下集：第 1 集）'
+              : '已切換至《' + item.title + '》第 ' + nextSeason + ' 季'
+          );
+        }
+
+        function handlePlusOne(dramaId) {
+          var idx = dramas.findIndex(function (d) { return d.id === dramaId; });
+          if (idx === -1) return;
+
+          var item = dramas[idx];
+          var nextEp = (Number(item.currentEpisode) || 0) + 1;
+          item.currentEpisode = nextEp;
+          item.updatedAt = Date.now();
+
+          if (item.status === 'plan') {
+            item.status = 'watching';
+            currentTab = 'watching';
+            syncTabButtonsUI();
+          }
+
+          saveDramas();
+          renderDramas();
+
+          // Open Next Episode URL Prompt Modal
+          document.getElementById('nextEpDramaId').value = item.id;
+          document.getElementById('nextEpProgressLabel').textContent = '已更新至 ' + formatEpisodeShortPlain(item);
+          document.getElementById('nextEpShowTitle').textContent = item.title;
+
+          var nextUrlInput = document.getElementById('nextEpUrlInput');
+          nextUrlInput.value = '';
+          var oldHint = document.getElementById('nextEpOldUrlHint');
+          oldHint.textContent = item.url ? '目前網址：' + item.url + '（留空將保留原連結）' : '目前尚未設定觀看網址';
+
+          var markCompletedRow = document.getElementById('markCompletedRow');
+          var markCompletedCheckbox = document.getElementById('markCompletedCheckbox');
+          if (item.totalEpisode && nextEp >= item.totalEpisode && item.status !== 'completed') {
+            markCompletedRow.style.display = 'flex';
+            markCompletedCheckbox.checked = true;
+          } else {
+            markCompletedRow.style.display = 'none';
+            markCompletedCheckbox.checked = false;
+          }
+
+          document.getElementById('nextEpPlatformPreview').innerHTML = '';
+          openModal('nextEpModal');
+          setTimeout(function () {
+            nextUrlInput.focus();
+          }, 80);
+        }
+
+        function handleNextEpSubmit(e) {
+          e.preventDefault();
+          var id = document.getElementById('nextEpDramaId').value;
+          var idx = dramas.findIndex(function (d) { return d.id === id; });
+          if (idx === -1) {
+            closeModal('nextEpModal');
+            return;
+          }
+
+          var newUrl = document.getElementById('nextEpUrlInput').value.trim();
+          var markDone =
+            document.getElementById('markCompletedRow').style.display !== 'none' &&
+            document.getElementById('markCompletedCheckbox').checked;
+
+          if (newUrl) {
+            if (!isSafeUrl(newUrl)) {
+              showToast('請輸入有效的 http 或 https 網址');
+              return;
+            }
+            dramas[idx].url = normalizeUrl(newUrl);
+          }
+
+          if (markDone) {
+            dramas[idx].status = 'completed';
+            showToast('恭喜完食《' + dramas[idx].title + '》✨');
+          } else if (newUrl) {
+            showToast('已更新下一集觀看網址！');
+          }
+
+          dramas[idx].updatedAt = Date.now();
+          saveDramas();
+          renderDramas();
+          closeModal('nextEpModal');
+        }
+
+        function handleSkipNextEp() {
+          var id = document.getElementById('nextEpDramaId').value;
+          var idx = dramas.findIndex(function (d) { return d.id === id; });
+          var markDone =
+            idx !== -1 &&
+            document.getElementById('markCompletedRow').style.display !== 'none' &&
+            document.getElementById('markCompletedCheckbox').checked;
+
+          if (markDone) {
+            dramas[idx].status = 'completed';
+            saveDramas();
+            renderDramas();
+            showToast('恭喜完食《' + dramas[idx].title + '》✨');
+          }
+          closeModal('nextEpModal');
+        }
+
+        /* =========================================================
+           9. Delete & Quick Move Status
+           ========================================================= */
+        function openDeleteModal(id) {
+          var item = dramas.find(function (d) { return d.id === id; });
+          if (!item) return;
+          deleteTargetId = id;
+          document.getElementById('deleteModalMessage').textContent =
+            '將移除「' + item.title + '」的追劇紀錄，此動作無法復原。';
+          openModal('deleteModal');
+        }
+
+        function confirmDelete() {
+          if (!deleteTargetId) return;
+          var item = dramas.find(function (d) { return d.id === deleteTargetId; });
+          dramas = dramas.filter(function (d) { return d.id !== deleteTargetId; });
+          delete expandedIds[deleteTargetId];
+          saveDramas();
+          renderDramas();
+          closeModal('deleteModal');
+          if (item) showToast('已刪除《' + item.title + '》');
+          deleteTargetId = null;
+        }
+
+        function quickMoveStatus(id, newStatus) {
+          var idx = dramas.findIndex(function (d) { return d.id === id; });
+          if (idx === -1) return;
+          dramas[idx].status = newStatus;
+          dramas[idx].updatedAt = Date.now();
+          saveDramas();
+          renderDramas();
+          if (newStatus === 'completed') {
+            showToast('已將《' + dramas[idx].title + '》移至已完食 ✨');
+          } else if (newStatus === 'watching') {
+            showToast('已將《' + dramas[idx].title + '》移至正在追 🍿');
+          }
+        }
+
+        /* =========================================================
+           10. Export / Import Backup (.json)
+           ========================================================= */
+        function exportBackup() {
+          var payload = {
+            app: 'cozy-drama-notes',
+            version: 2,
+            exportedAt: new Date().toISOString(),
+            dramas: dramas,
+          };
+          var jsonStr = JSON.stringify(payload, null, 2);
+          var blob = new Blob([jsonStr], { type: 'application/json' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          var dateStr = new Date().toISOString().slice(0, 10);
+          a.href = url;
+          a.download = 'drama-notes-backup-' + dateStr + '.json';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(function () {
+            URL.revokeObjectURL(url);
+          }, 1000);
+          showToast('已匯出追劇備份檔案（共 ' + dramas.length + ' 部）');
+        }
+
+        function sanitizeImportedItems(arr) {
+          var validStatuses = { watching: true, plan: true, completed: true };
+          var out = [];
+          for (var i = 0; i < arr.length; i++) {
+            var item = arr[i];
+            if (!item || typeof item.title !== 'string' || !item.title.trim()) continue;
+            var rawUrl = typeof item.url === 'string' ? item.url.trim() : '';
+            out.push({
+              id: typeof item.id === 'string' && item.id ? item.id : generateId(),
+              title: item.title.trim().slice(0, 100),
+              episodeMode: item.episodeMode === 'season' ? 'season' : 'single',
+              season: Math.max(1, parseInt(item.season, 10) || 1),
+              currentEpisode: Math.max(0, parseInt(item.currentEpisode, 10) || 0),
+              totalEpisode: item.totalEpisode && parseInt(item.totalEpisode, 10) > 0 ? parseInt(item.totalEpisode, 10) : null,
+              url: rawUrl && isSafeUrl(rawUrl) ? normalizeUrl(rawUrl) : '',
+              status: validStatuses[item.status] ? item.status : 'watching',
+              note: typeof item.note === 'string' ? item.note.trim().slice(0, 400) : '',
+              updatedAt: typeof item.updatedAt === 'number' ? item.updatedAt : Date.now(),
+            });
+          }
+          return out;
+        }
+
+        function handleImportFile(e) {
+          var file = e.target.files && e.target.files[0];
+          e.target.value = '';
+          if (!file) return;
+
+          var reader = new FileReader();
+          reader.onload = function (ev) {
+            try {
+              var parsed = JSON.parse(ev.target.result);
+              var list = Array.isArray(parsed) ? parsed : parsed && Array.isArray(parsed.dramas) ? parsed.dramas : null;
+              if (!list) {
+                showToast('檔案格式不正確，請選擇有效的備份 JSON');
+                return;
+              }
+              var cleaned = sanitizeImportedItems(list);
+              if (cleaned.length === 0) {
+                showToast('備份檔案內沒有可用的劇集資料');
+                return;
+              }
+              pendingImportDramas = cleaned;
+              document.getElementById('importModalSummary').textContent =
+                '在備份檔案中找到 ' + cleaned.length + ' 部劇集紀錄，請問要如何匯入？';
+              openModal('importModal');
+            } catch (err) {
+              showToast('無法解析 JSON 檔案，請確認檔案是否損毀');
+            }
+          };
+          reader.readAsText(file);
+        }
+
+        function applyImport(mode) {
+          if (!pendingImportDramas) return;
+          if (mode === 'replace') {
+            dramas = pendingImportDramas;
+            expandedIds = {};
+            showToast('已還原 ' + dramas.length + ' 部劇集紀錄');
+          } else {
+            var existingMap = {};
+            for (var i = 0; i < dramas.length; i++) {
+              existingMap[dramas[i].id] = i;
+            }
+            var added = 0;
+            for (var j = 0; j < pendingImportDramas.length; j++) {
+              var inc = pendingImportDramas[j];
+              if (existingMap[inc.id] !== undefined) {
+                dramas[existingMap[inc.id]] = inc;
+              } else {
+                dramas.push(inc);
+                added++;
+              }
+            }
+            showToast('已合併匯入（新增 ' + added + ' 部紀錄）');
+          }
+          pendingImportDramas = null;
+          saveDramas();
+          renderDramas();
+          closeModal('importModal');
+        }
+
+        /* =========================================================
+           11. Tabs, Search, PWA Install Button & Events
+           ========================================================= */
+        function syncTabButtonsUI() {
+          var tabBtns = document.querySelectorAll('.tab-btn');
+          for (var i = 0; i < tabBtns.length; i++) {
+            var isMatch = tabBtns[i].getAttribute('data-tab') === currentTab;
+            tabBtns[i].classList.toggle('active', isMatch);
+            tabBtns[i].setAttribute('aria-selected', isMatch ? 'true' : 'false');
+          }
+        }
+
+        function switchTab(tab) {
+          currentTab = tab;
+          syncTabButtonsUI();
+          renderDramas();
+        }
+
+        function clearSearch() {
+          searchQuery = '';
+          var input = document.getElementById('searchInput');
+          input.value = '';
+          document.getElementById('searchClearBtn').classList.remove('visible');
+          renderDramas();
+        }
+
+        function setupInstallPromptUI() {
+          var btn = document.getElementById('pwaInstallBtn');
+          if (!btn) return;
+
+          var isStandalone =
+            (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+            window.navigator.standalone === true;
+
+          if (isStandalone) {
+            btn.classList.add('hidden');
+            return;
+          }
+
+          var ua = window.navigator.userAgent.toLowerCase();
+          var isIOS = /iphone|ipad|ipod/.test(ua);
+
+          if (isIOS) {
+            btn.classList.remove('hidden');
+            btn.addEventListener('click', function () {
+              openModal('iosInstallModal');
+            });
+          }
+
+          window.addEventListener('beforeinstallprompt', function (e) {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            btn.classList.remove('hidden');
+          });
+
+          btn.addEventListener('click', function () {
+            if (deferredInstallPrompt) {
+              deferredInstallPrompt.prompt();
+              deferredInstallPrompt.userChoice.then(function (choice) {
+                if (choice && choice.outcome === 'accepted') {
+                  btn.classList.add('hidden');
+                  showToast('已安裝至主畫面！');
+                }
+                deferredInstallPrompt = null;
+              });
+            }
+          });
+
+          window.addEventListener('appinstalled', function () {
+            btn.classList.add('hidden');
+            deferredInstallPrompt = null;
+          });
+        }
+
+        function setupOnlineStatus() {
+          var banner = document.getElementById('offlineBanner');
+          function update() {
+            if (!banner) return;
+            banner.classList.toggle('visible', !navigator.onLine);
+          }
+          window.addEventListener('online', update);
+          window.addEventListener('offline', update);
+          update();
+        }
+
+        function bindEvents() {
+          // Theme toggle
+          document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+
+          // Tabs
+          var tabBtns = document.querySelectorAll('.tab-btn');
+          for (var i = 0; i < tabBtns.length; i++) {
+            tabBtns[i].addEventListener('click', function () {
+              switchTab(this.getAttribute('data-tab'));
+            });
+          }
+
+          // Search
+          var searchInput = document.getElementById('searchInput');
+          var searchClearBtn = document.getElementById('searchClearBtn');
+          searchInput.addEventListener('input', function () {
+            searchQuery = this.value;
+            searchClearBtn.classList.toggle('visible', searchQuery.length > 0);
+            renderDramas();
+          });
+          searchClearBtn.addEventListener('click', clearSearch);
+
+          // Tree Expand/Collapse All
+          document.getElementById('expandAllBtn').addEventListener('click', expandAllDramas);
+          document.getElementById('collapseAllBtn').addEventListener('click', collapseAllDramas);
+
+          // Add buttons
+          document.getElementById('addDramaDesktopBtn').addEventListener('click', function () { openDramaModal(null); });
+          document.getElementById('addDramaMobileBtn').addEventListener('click', function () { openDramaModal(null); });
+
+          // Drama Modal Form
+          document.getElementById('closeDramaModalBtn').addEventListener('click', function () { closeModal('dramaModal'); });
+          document.getElementById('cancelDramaModalBtn').addEventListener('click', function () { closeModal('dramaModal'); });
+          document.getElementById('dramaForm').addEventListener('submit', handleDramaFormSubmit);
+          document.getElementById('formUrl').addEventListener('input', updateFormPlatformPreview);
+
+          var modeBtns = document.querySelectorAll('#formEpisodeModeSelector .mode-option');
+          for (var mIdx = 0; mIdx < modeBtns.length; mIdx++) {
+            modeBtns[mIdx].addEventListener('click', function () {
+              setFormEpisodeMode(this.getAttribute('data-mode'));
+            });
+          }
+
+          var statusBtns = document.querySelectorAll('#formStatusSelector .status-option');
+          for (var j = 0; j < statusBtns.length; j++) {
+            statusBtns[j].addEventListener('click', function () {
+              setFormStatus(this.getAttribute('data-status'));
+            });
+          }
+
+          // Next Episode Modal
+          document.getElementById('closeNextEpModalBtn').addEventListener('click', handleSkipNextEp);
+          document.getElementById('skipNextEpBtn').addEventListener('click', handleSkipNextEp);
+          document.getElementById('nextEpForm').addEventListener('submit', handleNextEpSubmit);
+          document.getElementById('nextEpUrlInput').addEventListener('input', function () {
+            var preview = document.getElementById('nextEpPlatformPreview');
+            preview.innerHTML = this.value.trim() ? renderPlatformBadgeHtml(this.value) : '';
+            refreshIcons();
+          });
+
+          // Delete Modal
+          document.getElementById('closeDeleteModalBtn').addEventListener('click', function () { closeModal('deleteModal'); });
+          document.getElementById('cancelDeleteBtn').addEventListener('click', function () { closeModal('deleteModal'); });
+          document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
+
+          // Export / Import
+          document.getElementById('exportBtn').addEventListener('click', exportBackup);
+          document.getElementById('importBtn').addEventListener('click', function () {
+            document.getElementById('importFileInput').click();
+          });
+          document.getElementById('importFileInput').addEventListener('change', handleImportFile);
+          document.getElementById('closeImportModalBtn').addEventListener('click', function () { closeModal('importModal'); });
+          document.getElementById('cancelImportBtn').addEventListener('click', function () { closeModal('importModal'); });
+          document.getElementById('importMergeBtn').addEventListener('click', function () { applyImport('merge'); });
+          document.getElementById('importReplaceBtn').addEventListener('click', function () { applyImport('replace'); });
+
+          // iOS Guide Modal
+          document.getElementById('closeIosInstallBtn').addEventListener('click', function () { closeModal('iosInstallModal'); });
+          document.getElementById('doneIosInstallBtn').addEventListener('click', function () { closeModal('iosInstallModal'); });
+
+          // Backdrop click to close modals
+          var backdrops = document.querySelectorAll('.modal-backdrop');
+          for (var k = 0; k < backdrops.length; k++) {
+            backdrops[k].addEventListener('click', function (e) {
+              if (e.target === this) {
+                if (this.id === 'nextEpModal') {
+                  handleSkipNextEp();
+                } else {
+                  this.classList.remove('open');
+                }
+              }
+            });
+          }
+
+          // ESC key to close active modal
+          document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+              var openModals = document.querySelectorAll('.modal-backdrop.open');
+              for (var m = 0; m < openModals.length; m++) {
+                if (openModals[m].id === 'nextEpModal') {
+                  handleSkipNextEp();
+                } else {
+                  openModals[m].classList.remove('open');
+                }
+              }
+            }
+          });
+
+          // Event delegation for drama list actions
+          document.getElementById('dramaList').addEventListener('click', function (e) {
+            var target = e.target.closest('[data-action]');
+            if (!target) return;
+            var action = target.getAttribute('data-action');
+            var id = target.getAttribute('data-id');
+
+            if (action === 'toggle-expand') {
+              toggleExpandDrama(id);
+            } else if (action === 'watch') {
+              var idx = dramas.findIndex(function (d) { return d.id === id; });
+              if (idx !== -1) {
+                dramas[idx].updatedAt = Date.now();
+                saveDramas();
+                setTimeout(renderDramas, 150);
+              }
+            } else if (action === 'watch-empty') {
+              showToast('尚未設定觀看連結，請先在編輯視窗貼上網址');
+              openDramaModal(id);
+            } else if (action === 'minus-one') {
+              handleMinusOne(id);
+            } else if (action === 'plus-one') {
+              handlePlusOne(id);
+            } else if (action === 'season-minus') {
+              handleSeasonStep(id, -1);
+            } else if (action === 'season-plus') {
+              handleSeasonStep(id, 1);
+            } else if (action === 'edit') {
+              openDramaModal(id);
+            } else if (action === 'delete') {
+              openDeleteModal(id);
+            } else if (action === 'mark-completed') {
+              quickMoveStatus(id, 'completed');
+            } else if (action === 'start-watching') {
+              quickMoveStatus(id, 'watching');
+            }
+          });
+        }
+
+        /* =========================================================
+           12. Bootstrap
+           ========================================================= */
+        document.addEventListener('DOMContentLoaded', function () {
+          syncThemeUI();
+          setupPWA();
+          setupInstallPromptUI();
+          setupOnlineStatus();
+          loadDramas();
+          bindEvents();
+          renderDramas();
+        });
+
+        window.addEventListener('load', function () {
+          refreshIcons();
+        });
+      })();
+    </script>
+  </body>
+</html>
