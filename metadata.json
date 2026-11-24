@@ -2,5 +2,7 @@
   "name": "溫馨追劇進度筆記",
   "description": "深夜追劇咖啡廳風格的個人追劇進度筆記，支援集數追蹤、平台自動辨識、JSON 備份還原與 PWA 安裝。",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
