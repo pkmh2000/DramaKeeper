@@ -255,7 +255,8 @@
       /* Notebook Switcher Bar */
       .notebook-bar {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
+        justify-content: space-between;
         gap: 8px;
         margin-bottom: 12px;
       }
@@ -265,15 +266,9 @@
         min-width: 0;
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
         gap: 6px;
-        overflow-x: auto;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
         padding: 2px 0;
-      }
-
-      .notebook-scroller::-webkit-scrollbar {
-        display: none;
       }
 
       .notebook-btn {
@@ -317,8 +312,9 @@
       .notebook-bar-actions {
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 6px;
         flex-shrink: 0;
+        padding-top: 2px;
       }
 
       .btn-add-notebook {
@@ -342,14 +338,18 @@
       }
 
       .btn-edit-notebook {
-        min-width: 40px;
         min-height: 40px;
+        padding: 0 11px;
         border-radius: 11px;
         background-color: var(--bg-subtle);
         color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 600;
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        gap: 5px;
+        white-space: nowrap;
         transition: background-color 150ms ease, color 150ms ease;
       }
 
@@ -380,6 +380,163 @@
         border-color: var(--accent);
         background-color: var(--accent-soft);
         transform: scale(1.04);
+      }
+
+      .manage-nb-list,
+      .move-nb-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      .manage-nb-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background-color: var(--bg-page);
+        border: 1px solid var(--border-hairline);
+      }
+
+      .manage-nb-row.is-active {
+        border-color: var(--accent);
+        background-color: var(--accent-soft);
+      }
+
+      .manage-nb-info {
+        flex: 1;
+        min-width: 0;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 36px;
+      }
+
+      .manage-nb-emoji {
+        font-size: 18px;
+        flex-shrink: 0;
+      }
+
+      .manage-nb-text {
+        min-width: 0;
+      }
+
+      .manage-nb-name {
+        font-size: 14.5px;
+        font-weight: 600;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .manage-nb-meta {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      .manage-nb-actions {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        flex-shrink: 0;
+      }
+
+      .manage-icon-btn {
+        min-width: 38px;
+        min-height: 38px;
+        border-radius: 9px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        transition: background-color 140ms ease, color 140ms ease;
+      }
+
+      .manage-icon-btn:hover {
+        background-color: var(--bg-subtle);
+        color: var(--text-primary);
+      }
+
+      .manage-icon-btn.danger:hover {
+        background-color: var(--danger-soft);
+        color: var(--danger);
+      }
+
+      .manage-icon-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+
+      .move-nb-option {
+        width: 100%;
+        min-height: 48px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border-strong);
+        background-color: var(--bg-page);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        text-align: left;
+        transition: border-color 150ms ease, background-color 150ms ease, transform 120ms ease;
+      }
+
+      .move-nb-option:hover {
+        border-color: var(--accent);
+        background-color: var(--accent-soft);
+      }
+
+      .move-nb-option:active {
+        transform: scale(0.99);
+      }
+
+      .move-nb-option.is-current {
+        border-color: var(--accent);
+        background-color: var(--accent-soft);
+      }
+
+      .move-nb-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .move-nb-name {
+        font-size: 14.5px;
+        font-weight: 600;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .move-nb-right {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--text-muted);
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .move-nb-option.is-current .move-nb-right {
+        color: var(--accent);
+      }
+
+      @media (max-width: 520px) {
+        .notebook-bar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .notebook-bar-actions {
+          justify-content: flex-end;
+        }
       }
 
       /* Tabs */
@@ -777,6 +934,24 @@
         background-color: var(--bg-subtle);
         padding: 4px 9px;
         border-radius: 8px;
+      }
+
+      .notebook-move-chip {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        background-color: var(--bg-subtle);
+        padding: 4px 9px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: background-color 140ms ease, color 140ms ease;
+      }
+
+      .notebook-move-chip:hover {
+        background-color: var(--accent-soft);
+        color: var(--accent);
       }
 
       .card-meta-time {
@@ -1659,8 +1834,9 @@
       <div class="notebook-bar" aria-label="筆記本切換">
         <div class="notebook-scroller" id="notebookScroller"></div>
         <div class="notebook-bar-actions">
-          <button type="button" id="editNotebookBtn" class="btn-edit-notebook" title="編輯目前筆記本" aria-label="編輯目前筆記本">
-            <i data-lucide="settings-2" width="17" height="17"></i>
+          <button type="button" id="manageNotebooksBtn" class="btn-edit-notebook" title="編輯或刪除筆記本" aria-label="管理筆記本">
+            <i data-lucide="sliders-horizontal" width="15" height="15"></i>
+            <span>管理</span>
           </button>
           <button type="button" id="addNotebookBtn" class="btn-add-notebook" title="新增筆記本" aria-label="新增筆記本">
             <i data-lucide="folder-plus" width="16" height="16"></i>
@@ -1864,7 +2040,7 @@
     </div>
 
     <!-- Add / Edit Notebook Modal -->
-    <div id="notebookModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="notebookModalTitle">
+    <div id="notebookModal" class="modal-backdrop" style="z-index: 65" role="dialog" aria-modal="true" aria-labelledby="notebookModalTitle">
       <div class="modal-card" style="max-width: 420px">
         <div class="modal-header">
           <h2 id="notebookModalTitle" class="modal-title">新增筆記本</h2>
@@ -1916,12 +2092,66 @@
               <span>刪除此筆記本</span>
             </button>
           </div>
+          <div id="singleNotebookHint" class="helper-text" style="display: none; margin-top: 10px">
+            目前只有 1 本筆記本（至少需保留 1 本）；新增其他筆記本後即可刪除這本。
+          </div>
 
           <div class="modal-footer">
             <button type="button" class="btn-secondary" id="cancelNotebookModalBtn">取消</button>
             <button type="submit" class="btn-primary btn-full">儲存筆記本</button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Manage All Notebooks Modal -->
+    <div id="manageNotebooksModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="manageNotebooksTitle">
+      <div class="modal-card" style="max-width: 460px">
+        <div class="modal-header">
+          <h2 id="manageNotebooksTitle" class="modal-title">管理筆記本</h2>
+          <button type="button" class="icon-btn" id="closeManageNotebooksBtn" aria-label="關閉視窗">
+            <i data-lucide="x" width="20" height="20"></i>
+          </button>
+        </div>
+        <p id="manageNotebooksSubtitle" class="helper-text" style="margin-top: -8px; margin-bottom: 14px">
+          可建立無限本筆記本；點擊名稱切換，或編輯、排序、刪除筆記本
+        </p>
+        <div id="manageNotebooksList" class="manage-nb-list"></div>
+        <div class="modal-footer" style="margin-top: 12px">
+          <button type="button" class="btn-secondary" id="doneManageNotebooksBtn">完成</button>
+          <button type="button" class="btn-primary btn-full" id="manageAddNotebookBtn">
+            <i data-lucide="folder-plus" width="16" height="16"></i>
+            <span>新增筆記本</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Move Drama to Another Notebook Modal -->
+    <div id="moveNotebookModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="moveNotebookTitle">
+      <div class="modal-card" style="max-width: 420px">
+        <div class="modal-header">
+          <h2 id="moveNotebookTitle" class="modal-title">移動至筆記本</h2>
+          <button type="button" class="icon-btn" id="closeMoveNotebookBtn" aria-label="關閉視窗">
+            <i data-lucide="x" width="20" height="20"></i>
+          </button>
+        </div>
+        <p id="moveNotebookDramaLabel" style="margin: -6px 0 14px; font-size: 14px; color: var(--text-secondary)"></p>
+        <input type="hidden" id="moveNotebookDramaId" />
+        <div id="moveNotebookList" class="move-nb-list"></div>
+        <div style="border-top: 1px solid var(--border-hairline); padding-top: 12px">
+          <form id="quickCreateMoveForm" style="display: flex; gap: 8px">
+            <input
+              type="text"
+              id="quickCreateNbInput"
+              class="form-control"
+              placeholder="輸入新筆記本名稱並直接移入..."
+              maxlength="30"
+              style="min-height: 44px; flex: 1"
+            />
+            <button type="submit" class="btn-primary" style="height: 44px; padding: 0 14px">新建並移入</button>
+          </form>
+        </div>
       </div>
     </div>
 
@@ -2408,7 +2638,12 @@
           'chevrons-up': '<path d="m17 11-5-5-5 5"/><path d="m17 18-5-5-5 5"/>',
           'external-link': '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
           'folder-plus': '<path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
-          'settings-2': '<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>'
+          'settings-2': '<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>',
+          'sliders-horizontal': '<line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/>',
+          'folder-input': '<path d="M2 9V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1"/><path d="M2 13h10"/><path d="m9 16 3-3-3-3"/>',
+          'arrow-right-left': '<path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/>',
+          'arrow-up': '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
+          'arrow-down': '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>'
         };
 
         function refreshIcons() {
@@ -2501,7 +2736,6 @@
 
         function renderNotebookBar() {
           var scroller = document.getElementById('notebookScroller');
-          var editBtn = document.getElementById('editNotebookBtn');
           if (!scroller) return;
 
           var counts = {};
@@ -2544,8 +2778,8 @@
           }
 
           scroller.innerHTML = html;
-          if (editBtn) {
-            editBtn.style.display = currentNotebookId === 'all' ? 'none' : 'inline-flex';
+          if (document.getElementById('manageNotebooksModal').classList.contains('open')) {
+            renderManageNotebooksList();
           }
         }
 
@@ -2855,10 +3089,16 @@
             }
 
             var nbObj = getNotebookById(ensureValidNotebookId(d.notebookId));
-            var nbTagHtml =
-              currentNotebookId === 'all' && nbObj
-                ? '<span class="mode-tag">' + escapeHtml(nbObj.icon + ' ' + nbObj.name) + '</span>'
-                : '';
+            var nbTagHtml = nbObj
+              ? '<button type="button" class="notebook-move-chip" data-action="move-notebook" data-id="' +
+                escapeHtml(d.id) +
+                '" title="點擊移動到其他筆記本">' +
+                '<span>' +
+                escapeHtml(nbObj.icon + ' ' + nbObj.name) +
+                '</span>' +
+                '<i data-lucide="arrow-right-left" width="12" height="12"></i>' +
+                '</button>'
+              : '';
 
             html +=
               '<article class="drama-card' +
@@ -2923,6 +3163,11 @@
               watchBtnHtml +
               '        <div class="card-secondary-btns">' +
               quickMoveBtnHtml +
+              '          <button type="button" class="card-icon-btn" data-action="move-notebook" data-id="' +
+              escapeHtml(d.id) +
+              '" title="移動至其他筆記本" aria-label="移動至其他筆記本">' +
+              '            <i data-lucide="folder-input" width="18" height="18"></i>' +
+              '          </button>' +
               '          <button type="button" class="card-icon-btn" data-action="edit" data-id="' +
               escapeHtml(d.id) +
               '" title="編輯" aria-label="編輯劇集">' +
@@ -3180,6 +3425,7 @@
           form.reset();
           var delSec = document.getElementById('deleteNotebookSection');
           var delCb = document.getElementById('deleteNotebookWithItemsCheckbox');
+          var singleHint = document.getElementById('singleNotebookHint');
 
           if (nbId) {
             var nb = getNotebookById(nbId);
@@ -3190,9 +3436,11 @@
             setNotebookEmoji(nb.icon || '📖');
             if (notebooks.length > 1) {
               delSec.style.display = 'block';
+              if (singleHint) singleHint.style.display = 'none';
               delCb.checked = false;
             } else {
               delSec.style.display = 'none';
+              if (singleHint) singleHint.style.display = 'block';
             }
           } else {
             document.getElementById('notebookModalTitle').textContent = '新增筆記本';
@@ -3200,6 +3448,7 @@
             document.getElementById('formNotebookName').value = '';
             setNotebookEmoji('📖');
             delSec.style.display = 'none';
+            if (singleHint) singleHint.style.display = 'none';
           }
 
           openModal('notebookModal');
@@ -3277,6 +3526,193 @@
           renderDramas();
           closeModal('notebookModal');
           showToast('已刪除筆記本「' + (nb ? nb.name : '') + '」');
+        }
+
+        /* =========================================================
+           7C. Manage All Notebooks & Move Drama Across Notebooks
+           ========================================================= */
+        function renderManageNotebooksList() {
+          var listEl = document.getElementById('manageNotebooksList');
+          var subEl = document.getElementById('manageNotebooksSubtitle');
+          if (!listEl) return;
+
+          if (subEl) {
+            subEl.textContent = '無數量限制（目前已建立 ' + notebooks.length + ' 本）· 可切換、排序、編輯或刪除';
+          }
+
+          var counts = {};
+          for (var i = 0; i < dramas.length; i++) {
+            var nbId = ensureValidNotebookId(dramas[i].notebookId);
+            counts[nbId] = (counts[nbId] || 0) + 1;
+          }
+
+          var html = '';
+          for (var j = 0; j < notebooks.length; j++) {
+            var nb = notebooks[j];
+            var isCurrent = currentNotebookId === nb.id;
+            var count = counts[nb.id] || 0;
+            var canMoveUp = j > 0;
+            var canMoveDown = j < notebooks.length - 1;
+            var canDelete = notebooks.length > 1;
+
+            html +=
+              '<div class="manage-nb-row' +
+              (isCurrent ? ' is-active' : '') +
+              '">' +
+              '  <button type="button" class="manage-nb-info" data-nb-action="select" data-nb-id="' +
+              escapeHtml(nb.id) +
+              '">' +
+              '    <span class="manage-nb-emoji">' +
+              escapeHtml(nb.icon) +
+              '</span>' +
+              '    <div class="manage-nb-text">' +
+              '      <div class="manage-nb-name">' +
+              escapeHtml(nb.name) +
+              '</div>' +
+              '      <div class="manage-nb-meta tabular-nums">' +
+              count +
+              ' 部劇集' +
+              (isCurrent ? ' · 目前顯示中' : '') +
+              '</div>' +
+              '    </div>' +
+              '  </button>' +
+              '  <div class="manage-nb-actions">' +
+              '    <button type="button" class="manage-icon-btn" data-nb-action="up" data-nb-id="' +
+              escapeHtml(nb.id) +
+              '" title="上移"' +
+              (canMoveUp ? '' : ' disabled') +
+              '>' +
+              '      <i data-lucide="arrow-up" width="16" height="16"></i>' +
+              '    </button>' +
+              '    <button type="button" class="manage-icon-btn" data-nb-action="down" data-nb-id="' +
+              escapeHtml(nb.id) +
+              '" title="下移"' +
+              (canMoveDown ? '' : ' disabled') +
+              '>' +
+              '      <i data-lucide="arrow-down" width="16" height="16"></i>' +
+              '    </button>' +
+              '    <button type="button" class="manage-icon-btn" data-nb-action="edit" data-nb-id="' +
+              escapeHtml(nb.id) +
+              '" title="編輯名稱或圖示" aria-label="編輯筆記本">' +
+              '      <i data-lucide="pencil" width="16" height="16"></i>' +
+              '    </button>' +
+              '    <button type="button" class="manage-icon-btn danger" data-nb-action="delete" data-nb-id="' +
+              escapeHtml(nb.id) +
+              '" title="' +
+              (canDelete ? '刪除筆記本' : '至少需保留 1 本筆記本') +
+              '" aria-label="刪除筆記本">' +
+              '      <i data-lucide="trash-2" width="16" height="16"></i>' +
+              '    </button>' +
+              '  </div>' +
+              '</div>';
+          }
+
+          listEl.innerHTML = html;
+          refreshIcons();
+        }
+
+        function openManageNotebooksModal() {
+          renderManageNotebooksList();
+          openModal('manageNotebooksModal');
+        }
+
+        function moveNotebookOrder(nbId, delta) {
+          var idx = notebooks.findIndex(function (n) { return n.id === nbId; });
+          if (idx === -1) return;
+          var targetIdx = idx + delta;
+          if (targetIdx < 0 || targetIdx >= notebooks.length) return;
+          var temp = notebooks[idx];
+          notebooks[idx] = notebooks[targetIdx];
+          notebooks[targetIdx] = temp;
+          saveNotebooks();
+          renderNotebookBar();
+          renderManageNotebooksList();
+        }
+
+        function openMoveNotebookModal(dramaId) {
+          var item = dramas.find(function (d) { return d.id === dramaId; });
+          if (!item) return;
+
+          var currentNbId = ensureValidNotebookId(item.notebookId);
+          document.getElementById('moveNotebookDramaId').value = item.id;
+          document.getElementById('moveNotebookDramaLabel').textContent = '選擇要將《' + item.title + '》移入哪個筆記本：';
+          document.getElementById('quickCreateNbInput').value = '';
+
+          var counts = {};
+          for (var i = 0; i < dramas.length; i++) {
+            var nId = ensureValidNotebookId(dramas[i].notebookId);
+            counts[nId] = (counts[nId] || 0) + 1;
+          }
+
+          var html = '';
+          for (var j = 0; j < notebooks.length; j++) {
+            var nb = notebooks[j];
+            var isCur = nb.id === currentNbId;
+            html +=
+              '<button type="button" class="move-nb-option' +
+              (isCur ? ' is-current' : '') +
+              '" data-target-nb-id="' +
+              escapeHtml(nb.id) +
+              '">' +
+              '  <div class="move-nb-left">' +
+              '    <span style="font-size: 18px">' +
+              escapeHtml(nb.icon) +
+              '</span>' +
+              '    <span class="move-nb-name">' +
+              escapeHtml(nb.name) +
+              '</span>' +
+              '  </div>' +
+              '  <span class="move-nb-right tabular-nums">' +
+              (isCur ? '目前所在' : (counts[nb.id] || 0) + ' 部 →') +
+              '  </span>' +
+              '</button>';
+          }
+
+          document.getElementById('moveNotebookList').innerHTML = html;
+          openModal('moveNotebookModal');
+        }
+
+        function moveDramaToNotebook(dramaId, targetNbId) {
+          var idx = dramas.findIndex(function (d) { return d.id === dramaId; });
+          if (idx === -1) return;
+          var validTargetId = ensureValidNotebookId(targetNbId);
+          var targetNb = getNotebookById(validTargetId);
+          if (!targetNb) return;
+
+          if (ensureValidNotebookId(dramas[idx].notebookId) === validTargetId) {
+            closeModal('moveNotebookModal');
+            showToast('《' + dramas[idx].title + '》已經在「' + targetNb.name + '」囉');
+            return;
+          }
+
+          dramas[idx].notebookId = validTargetId;
+          dramas[idx].updatedAt = Date.now();
+          saveDramas();
+          renderNotebookBar();
+          renderDramas();
+          closeModal('moveNotebookModal');
+          showToast('已將《' + dramas[idx].title + '》移至「' + targetNb.icon + ' ' + targetNb.name + '」');
+        }
+
+        function handleQuickCreateAndMove(e) {
+          e.preventDefault();
+          var dramaId = document.getElementById('moveNotebookDramaId').value;
+          var input = document.getElementById('quickCreateNbInput');
+          var name = input.value.trim();
+          if (!name) {
+            showToast('請輸入新筆記本名稱');
+            input.focus();
+            return;
+          }
+          var newNb = {
+            id: generateId('nb_'),
+            name: name.slice(0, 30),
+            icon: '📖',
+            createdAt: Date.now(),
+          };
+          notebooks.push(newNb);
+          saveNotebooks();
+          moveDramaToNotebook(dramaId, newNb.id);
         }
 
         /* =========================================================
@@ -3709,9 +4145,51 @@
           document.getElementById('addNotebookBtn').addEventListener('click', function () {
             openNotebookModal(null);
           });
-          document.getElementById('editNotebookBtn').addEventListener('click', function () {
-            if (currentNotebookId !== 'all') openNotebookModal(currentNotebookId);
+          document.getElementById('manageNotebooksBtn').addEventListener('click', openManageNotebooksModal);
+          document.getElementById('closeManageNotebooksBtn').addEventListener('click', function () {
+            closeModal('manageNotebooksModal');
           });
+          document.getElementById('doneManageNotebooksBtn').addEventListener('click', function () {
+            closeModal('manageNotebooksModal');
+          });
+          document.getElementById('manageAddNotebookBtn').addEventListener('click', function () {
+            openNotebookModal(null);
+          });
+          document.getElementById('manageNotebooksList').addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-nb-action]');
+            if (!btn || btn.disabled) return;
+            var act = btn.getAttribute('data-nb-action');
+            var nbId = btn.getAttribute('data-nb-id');
+            if (act === 'select') {
+              switchNotebook(nbId);
+              closeModal('manageNotebooksModal');
+            } else if (act === 'up') {
+              moveNotebookOrder(nbId, -1);
+            } else if (act === 'down') {
+              moveNotebookOrder(nbId, 1);
+            } else if (act === 'edit') {
+              openNotebookModal(nbId);
+            } else if (act === 'delete') {
+              if (notebooks.length <= 1) {
+                showToast('至少需保留 1 本筆記本（可先新增其他筆記本再刪除）');
+                return;
+              }
+              openNotebookModal(nbId);
+            }
+          });
+
+          // Move drama across notebooks modal
+          document.getElementById('closeMoveNotebookBtn').addEventListener('click', function () {
+            closeModal('moveNotebookModal');
+          });
+          document.getElementById('moveNotebookList').addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-target-nb-id]');
+            if (!btn) return;
+            var dramaId = document.getElementById('moveNotebookDramaId').value;
+            moveDramaToNotebook(dramaId, btn.getAttribute('data-target-nb-id'));
+          });
+          document.getElementById('quickCreateMoveForm').addEventListener('submit', handleQuickCreateAndMove);
+
           document.getElementById('closeNotebookModalBtn').addEventListener('click', function () {
             closeModal('notebookModal');
           });
@@ -3859,6 +4337,8 @@
               handleSeasonStep(id, -1);
             } else if (action === 'season-plus') {
               handleSeasonStep(id, 1);
+            } else if (action === 'move-notebook') {
+              openMoveNotebookModal(id);
             } else if (action === 'edit') {
               openDramaModal(id);
             } else if (action === 'delete') {
