@@ -249,7 +249,137 @@
       .container {
         max-width: 680px;
         margin: 0 auto;
-        padding: 18px 16px 96px;
+        padding: 16px 16px 96px;
+      }
+
+      /* Notebook Switcher Bar */
+      .notebook-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .notebook-scroller {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding: 2px 0;
+      }
+
+      .notebook-scroller::-webkit-scrollbar {
+        display: none;
+      }
+
+      .notebook-btn {
+        min-height: 40px;
+        padding: 0 12px;
+        border-radius: 11px;
+        background-color: var(--bg-subtle);
+        border: 1.5px solid transparent;
+        color: var(--text-secondary);
+        font-size: 13.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+      }
+
+      .notebook-btn:hover {
+        background-color: var(--bg-hover);
+        color: var(--text-primary);
+      }
+
+      .notebook-btn.active {
+        background-color: var(--bg-surface);
+        border-color: var(--accent);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-tab);
+      }
+
+      .notebook-btn .nb-count {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      .notebook-btn.active .nb-count {
+        color: var(--accent);
+      }
+
+      .notebook-bar-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+
+      .btn-add-notebook {
+        min-height: 40px;
+        padding: 0 11px;
+        border-radius: 11px;
+        background-color: var(--accent-soft);
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+        transition: background-color 150ms ease, color 150ms ease;
+      }
+
+      .btn-add-notebook:hover {
+        background-color: var(--accent);
+        color: var(--accent-text);
+      }
+
+      .btn-edit-notebook {
+        min-width: 40px;
+        min-height: 40px;
+        border-radius: 11px;
+        background-color: var(--bg-subtle);
+        color: var(--text-secondary);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 150ms ease, color 150ms ease;
+      }
+
+      .btn-edit-notebook:hover {
+        background-color: var(--bg-hover);
+        color: var(--text-primary);
+      }
+
+      .emoji-picker {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+      }
+
+      .emoji-option {
+        min-height: 44px;
+        border-radius: 11px;
+        border: 1px solid var(--border-strong);
+        background-color: var(--bg-page);
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 140ms ease;
+      }
+
+      .emoji-option.selected {
+        border-color: var(--accent);
+        background-color: var(--accent-soft);
+        transform: scale(1.04);
       }
 
       /* Tabs */
@@ -1525,6 +1655,20 @@
     </header>
 
     <main class="container">
+      <!-- Notebook Switcher Bar -->
+      <div class="notebook-bar" aria-label="筆記本切換">
+        <div class="notebook-scroller" id="notebookScroller"></div>
+        <div class="notebook-bar-actions">
+          <button type="button" id="editNotebookBtn" class="btn-edit-notebook" title="編輯目前筆記本" aria-label="編輯目前筆記本">
+            <i data-lucide="settings-2" width="17" height="17"></i>
+          </button>
+          <button type="button" id="addNotebookBtn" class="btn-add-notebook" title="新增筆記本" aria-label="新增筆記本">
+            <i data-lucide="folder-plus" width="16" height="16"></i>
+            <span>新筆記本</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Status Tabs -->
       <nav class="tabs-wrapper" role="tablist" aria-label="追劇狀態分類">
         <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-tab="watching">
@@ -1688,6 +1832,11 @@
           </div>
 
           <div class="form-group">
+            <label for="formNotebook" class="form-label">所屬筆記本</label>
+            <select id="formNotebook" class="form-control"></select>
+          </div>
+
+          <div class="form-group">
             <span class="form-label">追劇狀態</span>
             <div class="status-selector" id="formStatusSelector">
               <button type="button" class="status-option selected" data-status="watching">🍿 正在追</button>
@@ -1709,6 +1858,68 @@
           <div class="modal-footer">
             <button type="button" class="btn-secondary" id="cancelDramaModalBtn">取消</button>
             <button type="submit" class="btn-primary btn-full">儲存筆記</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add / Edit Notebook Modal -->
+    <div id="notebookModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="notebookModalTitle">
+      <div class="modal-card" style="max-width: 420px">
+        <div class="modal-header">
+          <h2 id="notebookModalTitle" class="modal-title">新增筆記本</h2>
+          <button type="button" class="icon-btn" id="closeNotebookModalBtn" aria-label="關閉視窗">
+            <i data-lucide="x" width="20" height="20"></i>
+          </button>
+        </div>
+
+        <form id="notebookForm" novalidate>
+          <input type="hidden" id="formNotebookId" />
+
+          <div class="form-group">
+            <label for="formNotebookName" class="form-label">
+              <span>筆記本名稱 <span class="required-mark">*</span></span>
+            </label>
+            <input
+              type="text"
+              id="formNotebookName"
+              class="form-control"
+              placeholder="例如：韓劇清單、週末動畫、家人一起看"
+              required
+              maxlength="30"
+            />
+          </div>
+
+          <div class="form-group">
+            <span class="form-label">選擇圖示</span>
+            <div class="emoji-picker" id="notebookEmojiPicker">
+              <button type="button" class="emoji-option selected" data-emoji="📖">📖</button>
+              <button type="button" class="emoji-option" data-emoji="🍿">🍿</button>
+              <button type="button" class="emoji-option" data-emoji="🎬">🎬</button>
+              <button type="button" class="emoji-option" data-emoji="📺">📺</button>
+              <button type="button" class="emoji-option" data-emoji="☕">☕</button>
+              <button type="button" class="emoji-option" data-emoji="🌙">🌙</button>
+              <button type="button" class="emoji-option" data-emoji="🌸">🌸</button>
+              <button type="button" class="emoji-option" data-emoji="🛋️">🛋️</button>
+              <button type="button" class="emoji-option" data-emoji="✨">✨</button>
+              <button type="button" class="emoji-option" data-emoji="🎧">🎧</button>
+            </div>
+          </div>
+
+          <div id="deleteNotebookSection" style="display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-hairline)">
+            <label class="checkbox-row" id="deleteNotebookWithItemsRow" style="margin-top: 0; margin-bottom: 10px">
+              <input type="checkbox" id="deleteNotebookWithItemsCheckbox" />
+              <span>連同此筆記本內的劇集一併刪除（未勾選則會保留劇集並移至預設筆記本）</span>
+            </label>
+            <button type="button" class="btn-danger" id="deleteNotebookBtn" style="width: 100%">
+              <i data-lucide="trash-2" width="16" height="16"></i>
+              <span>刪除此筆記本</span>
+            </button>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" id="cancelNotebookModalBtn">取消</button>
+            <button type="submit" class="btn-primary btn-full">儲存筆記本</button>
           </div>
         </form>
       </div>
@@ -1828,6 +2039,8 @@
         'use strict';
 
         var STORAGE_KEY = 'cozy_drama_notes_v1';
+        var NOTEBOOKS_KEY = 'cozy_drama_notebooks_v1';
+        var ACTIVE_NOTEBOOK_KEY = 'cozy_drama_active_notebook_v1';
         var INIT_FLAG_KEY = 'cozy_drama_notes_initialized_v1';
         var THEME_KEY = 'cozy_drama_theme_v1';
 
@@ -1925,21 +2138,34 @@
         }
 
         /* =========================================================
-           2. State & Sample Seed Data
+           2. State, Notebooks & Sample Seed Data
            ========================================================= */
         var currentTab = 'watching';
+        var currentNotebookId = 'nb_default';
         var searchQuery = '';
+        var notebooks = [];
         var dramas = [];
         var expandedIds = {};
-        var pendingImportDramas = null;
+        var pendingImportData = null;
         var deleteTargetId = null;
         var deferredInstallPrompt = null;
 
-        function generateId() {
+        function generateId(prefix) {
           if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-            return crypto.randomUUID();
+            return (prefix || '') + crypto.randomUUID();
           }
-          return 'd_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+          return (prefix || 'd_') + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+        }
+
+        function createDefaultNotebooks() {
+          return [
+            {
+              id: 'nb_default',
+              name: '我的追劇本',
+              icon: '📖',
+              createdAt: Date.now(),
+            },
+          ];
         }
 
         function createSampleDramas() {
@@ -1947,6 +2173,7 @@
           return [
             {
               id: generateId(),
+              notebookId: 'nb_default',
               title: '機智醫生生活',
               episodeMode: 'season',
               season: 2,
@@ -1959,6 +2186,7 @@
             },
             {
               id: generateId(),
+              notebookId: 'nb_default',
               title: '葬送的芙莉蓮',
               episodeMode: 'single',
               season: 1,
@@ -1972,6 +2200,26 @@
           ];
         }
 
+        function normalizeNotebookRecord(nb) {
+          return {
+            id: typeof nb.id === 'string' && nb.id ? nb.id : generateId('nb_'),
+            name: typeof nb.name === 'string' && nb.name.trim() ? nb.name.trim().slice(0, 30) : '未命名筆記本',
+            icon: typeof nb.icon === 'string' && nb.icon.trim() ? nb.icon.trim() : '📖',
+            createdAt: typeof nb.createdAt === 'number' ? nb.createdAt : Date.now(),
+          };
+        }
+
+        function getFallbackNotebookId() {
+          return notebooks.length > 0 ? notebooks[0].id : 'nb_default';
+        }
+
+        function ensureValidNotebookId(nbId) {
+          if (nbId && notebooks.some(function (n) { return n.id === nbId; })) {
+            return nbId;
+          }
+          return getFallbackNotebookId();
+        }
+
         function normalizeDramaRecord(item) {
           var mode = item.episodeMode === 'season' ? 'season' : 'single';
           var seasonNum = Math.max(1, parseInt(item.season, 10) || 1);
@@ -1979,6 +2227,7 @@
           var totEp = item.totalEpisode && parseInt(item.totalEpisode, 10) > 0 ? parseInt(item.totalEpisode, 10) : null;
           return {
             id: item.id || generateId(),
+            notebookId: ensureValidNotebookId(item.notebookId),
             title: item.title || '',
             episodeMode: mode,
             season: seasonNum,
@@ -1991,8 +2240,27 @@
           };
         }
 
-        function loadDramas() {
+        function loadState() {
           try {
+            var rawNb = localStorage.getItem(NOTEBOOKS_KEY);
+            if (rawNb) {
+              var parsedNb = JSON.parse(rawNb);
+              if (Array.isArray(parsedNb) && parsedNb.length > 0) {
+                notebooks = parsedNb.map(normalizeNotebookRecord);
+              }
+            }
+            if (notebooks.length === 0) {
+              notebooks = createDefaultNotebooks();
+              saveNotebooks();
+            }
+
+            var savedActiveNb = localStorage.getItem(ACTIVE_NOTEBOOK_KEY);
+            if (savedActiveNb === 'all' || notebooks.some(function (n) { return n.id === savedActiveNb; })) {
+              currentNotebookId = savedActiveNb;
+            } else {
+              currentNotebookId = notebooks[0].id;
+            }
+
             var raw = localStorage.getItem(STORAGE_KEY);
             var initialized = localStorage.getItem(INIT_FLAG_KEY);
             if (raw) {
@@ -2010,8 +2278,17 @@
               dramas = [];
             }
           } catch (e) {
+            notebooks = createDefaultNotebooks();
+            currentNotebookId = notebooks[0].id;
             dramas = createSampleDramas();
           }
+        }
+
+        function saveNotebooks() {
+          try {
+            localStorage.setItem(NOTEBOOKS_KEY, JSON.stringify(notebooks));
+            localStorage.setItem(ACTIVE_NOTEBOOK_KEY, currentNotebookId);
+          } catch (e) {}
         }
 
         function saveDramas() {
@@ -2129,7 +2406,9 @@
           'chevron-right': '<path d="m9 18 6-6-6-6"/>',
           'chevrons-down': '<path d="m7 6 5 5 5-5"/><path d="m7 13 5 5 5-5"/>',
           'chevrons-up': '<path d="m17 11-5-5-5 5"/><path d="m17 18-5-5-5 5"/>',
-          'external-link': '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>'
+          'external-link': '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+          'folder-plus': '<path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
+          'settings-2': '<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>'
         };
 
         function refreshIcons() {
@@ -2213,10 +2492,78 @@
         /* =========================================================
            6. Render Logic
            ========================================================= */
+        function getNotebookById(nbId) {
+          for (var i = 0; i < notebooks.length; i++) {
+            if (notebooks[i].id === nbId) return notebooks[i];
+          }
+          return notebooks[0] || null;
+        }
+
+        function renderNotebookBar() {
+          var scroller = document.getElementById('notebookScroller');
+          var editBtn = document.getElementById('editNotebookBtn');
+          if (!scroller) return;
+
+          var counts = {};
+          for (var i = 0; i < dramas.length; i++) {
+            var nbId = ensureValidNotebookId(dramas[i].notebookId);
+            counts[nbId] = (counts[nbId] || 0) + 1;
+          }
+
+          var html = '';
+          if (notebooks.length > 1) {
+            html +=
+              '<button type="button" class="notebook-btn' +
+              (currentNotebookId === 'all' ? ' active' : '') +
+              '" data-notebook-id="all">' +
+              '<span>📚 全部</span>' +
+              '<span class="nb-count tabular-nums">' +
+              dramas.length +
+              '</span>' +
+              '</button>';
+          }
+
+          for (var j = 0; j < notebooks.length; j++) {
+            var nb = notebooks[j];
+            var isActive = currentNotebookId === nb.id;
+            html +=
+              '<button type="button" class="notebook-btn' +
+              (isActive ? ' active' : '') +
+              '" data-notebook-id="' +
+              escapeHtml(nb.id) +
+              '">' +
+              '<span>' +
+              escapeHtml(nb.icon) +
+              ' ' +
+              escapeHtml(nb.name) +
+              '</span>' +
+              '<span class="nb-count tabular-nums">' +
+              (counts[nb.id] || 0) +
+              '</span>' +
+              '</button>';
+          }
+
+          scroller.innerHTML = html;
+          if (editBtn) {
+            editBtn.style.display = currentNotebookId === 'all' ? 'none' : 'inline-flex';
+          }
+        }
+
+        function switchNotebook(nbId) {
+          currentNotebookId = nbId;
+          saveNotebooks();
+          renderNotebookBar();
+          renderDramas();
+        }
+
         function updateTabCounts() {
           var counts = { watching: 0, plan: 0, completed: 0 };
           for (var i = 0; i < dramas.length; i++) {
-            var st = dramas[i].status;
+            var item = dramas[i];
+            if (currentNotebookId !== 'all' && ensureValidNotebookId(item.notebookId) !== currentNotebookId) {
+              continue;
+            }
+            var st = item.status;
             if (counts[st] !== undefined) counts[st]++;
           }
           document.getElementById('count-watching').textContent = counts.watching;
@@ -2244,6 +2591,9 @@
           var q = searchQuery.trim().toLowerCase();
           return dramas
             .filter(function (item) {
+              if (currentNotebookId !== 'all' && ensureValidNotebookId(item.notebookId) !== currentNotebookId) {
+                return false;
+              }
               if (item.status !== currentTab) return false;
               if (!q) return true;
               var inTitle = (item.title || '').toLowerCase().indexOf(q) !== -1;
@@ -2504,6 +2854,12 @@
                 '</button>';
             }
 
+            var nbObj = getNotebookById(ensureValidNotebookId(d.notebookId));
+            var nbTagHtml =
+              currentNotebookId === 'all' && nbObj
+                ? '<span class="mode-tag">' + escapeHtml(nbObj.icon + ' ' + nbObj.name) + '</span>'
+                : '';
+
             html +=
               '<article class="drama-card' +
               (isExpanded ? ' expanded' : '') +
@@ -2543,6 +2899,7 @@
               '    <div class="tree-branch-node">' +
               '      <div class="branch-meta-row">' +
               renderPlatformBadgeHtml(d.url) +
+              nbTagHtml +
               '        <span class="mode-tag">' +
               (d.episodeMode === 'season' ? 'X季X集' : '單集制') +
               '</span>' +
@@ -2669,6 +3026,23 @@
           refreshIcons();
         }
 
+        function populateNotebookSelect(selectedNbId) {
+          var selectEl = document.getElementById('formNotebook');
+          if (!selectEl) return;
+          var html = '';
+          for (var i = 0; i < notebooks.length; i++) {
+            var nb = notebooks[i];
+            html +=
+              '<option value="' +
+              escapeHtml(nb.id) +
+              '">' +
+              escapeHtml(nb.icon + ' ' + nb.name) +
+              '</option>';
+          }
+          selectEl.innerHTML = html;
+          selectEl.value = ensureValidNotebookId(selectedNbId);
+        }
+
         function openDramaModal(dramaId) {
           var form = document.getElementById('dramaForm');
           form.reset();
@@ -2685,6 +3059,7 @@
             document.getElementById('formTotalEp').value = item.totalEpisode || '';
             document.getElementById('formUrl').value = item.url || '';
             document.getElementById('formNote').value = item.note || '';
+            populateNotebookSelect(item.notebookId);
             setFormStatus(item.status || 'watching');
           } else {
             document.getElementById('dramaModalTitle').textContent = '新增追劇紀錄';
@@ -2695,6 +3070,7 @@
             document.getElementById('formTotalEp').value = '';
             document.getElementById('formUrl').value = '';
             document.getElementById('formNote').value = '';
+            populateNotebookSelect(currentNotebookId === 'all' ? getFallbackNotebookId() : currentNotebookId);
             setFormStatus(currentTab || 'watching');
           }
 
@@ -2716,6 +3092,7 @@
           }
 
           var id = document.getElementById('formDramaId').value;
+          var selectedNbId = ensureValidNotebookId(document.getElementById('formNotebook').value);
           var seasonRaw = parseInt(document.getElementById('formSeason').value, 10);
           var seasonNum = selectedEpisodeMode === 'season' ? (isNaN(seasonRaw) || seasonRaw < 1 ? 1 : seasonRaw) : 1;
 
@@ -2740,6 +3117,7 @@
             if (idx !== -1) {
               dramas[idx] = {
                 id: id,
+                notebookId: selectedNbId,
                 title: title,
                 episodeMode: selectedEpisodeMode,
                 season: seasonNum,
@@ -2756,6 +3134,7 @@
             var newId = generateId();
             dramas.unshift({
               id: newId,
+              notebookId: selectedNbId,
               title: title,
               episodeMode: selectedEpisodeMode,
               season: seasonNum,
@@ -2770,12 +3149,134 @@
           }
 
           saveDramas();
+          if (currentNotebookId !== 'all' && currentNotebookId !== selectedNbId) {
+            currentNotebookId = selectedNbId;
+            saveNotebooks();
+          }
+          renderNotebookBar();
           if (currentTab !== selectedFormStatus) {
             switchTab(selectedFormStatus);
           } else {
             renderDramas();
           }
           closeModal('dramaModal');
+        }
+
+        /* =========================================================
+           7B. Notebook Create / Edit / Delete Modal
+           ========================================================= */
+        var selectedNotebookEmoji = '📖';
+
+        function setNotebookEmoji(emoji) {
+          selectedNotebookEmoji = emoji || '📖';
+          var btns = document.querySelectorAll('#notebookEmojiPicker .emoji-option');
+          for (var i = 0; i < btns.length; i++) {
+            btns[i].classList.toggle('selected', btns[i].getAttribute('data-emoji') === selectedNotebookEmoji);
+          }
+        }
+
+        function openNotebookModal(nbId) {
+          var form = document.getElementById('notebookForm');
+          form.reset();
+          var delSec = document.getElementById('deleteNotebookSection');
+          var delCb = document.getElementById('deleteNotebookWithItemsCheckbox');
+
+          if (nbId) {
+            var nb = getNotebookById(nbId);
+            if (!nb) return;
+            document.getElementById('notebookModalTitle').textContent = '編輯筆記本';
+            document.getElementById('formNotebookId').value = nb.id;
+            document.getElementById('formNotebookName').value = nb.name;
+            setNotebookEmoji(nb.icon || '📖');
+            if (notebooks.length > 1) {
+              delSec.style.display = 'block';
+              delCb.checked = false;
+            } else {
+              delSec.style.display = 'none';
+            }
+          } else {
+            document.getElementById('notebookModalTitle').textContent = '新增筆記本';
+            document.getElementById('formNotebookId').value = '';
+            document.getElementById('formNotebookName').value = '';
+            setNotebookEmoji('📖');
+            delSec.style.display = 'none';
+          }
+
+          openModal('notebookModal');
+          refreshIcons();
+          setTimeout(function () {
+            document.getElementById('formNotebookName').focus();
+          }, 80);
+        }
+
+        function handleNotebookFormSubmit(e) {
+          e.preventDefault();
+          var nameInput = document.getElementById('formNotebookName');
+          var name = nameInput.value.trim();
+          if (!name) {
+            showToast('請輸入筆記本名稱唷！');
+            nameInput.focus();
+            return;
+          }
+
+          var id = document.getElementById('formNotebookId').value;
+          if (id) {
+            var idx = notebooks.findIndex(function (n) { return n.id === id; });
+            if (idx !== -1) {
+              notebooks[idx].name = name.slice(0, 30);
+              notebooks[idx].icon = selectedNotebookEmoji;
+            }
+            showToast('已更新筆記本「' + name + '」');
+          } else {
+            var newNb = {
+              id: generateId('nb_'),
+              name: name.slice(0, 30),
+              icon: selectedNotebookEmoji,
+              createdAt: Date.now(),
+            };
+            notebooks.push(newNb);
+            currentNotebookId = newNb.id;
+            showToast('已建立筆記本「' + newNb.icon + ' ' + newNb.name + '」');
+          }
+
+          saveNotebooks();
+          renderNotebookBar();
+          renderDramas();
+          closeModal('notebookModal');
+        }
+
+        function handleDeleteNotebook() {
+          var id = document.getElementById('formNotebookId').value;
+          if (!id || notebooks.length <= 1) {
+            showToast('至少需要保留一個筆記本');
+            return;
+          }
+          var nb = getNotebookById(id);
+          var deleteItems = document.getElementById('deleteNotebookWithItemsCheckbox').checked;
+
+          notebooks = notebooks.filter(function (n) { return n.id !== id; });
+          var fallbackId = getFallbackNotebookId();
+
+          if (deleteItems) {
+            dramas = dramas.filter(function (d) { return d.notebookId !== id; });
+          } else {
+            for (var i = 0; i < dramas.length; i++) {
+              if (dramas[i].notebookId === id) {
+                dramas[i].notebookId = fallbackId;
+              }
+            }
+          }
+
+          if (currentNotebookId === id) {
+            currentNotebookId = fallbackId;
+          }
+
+          saveNotebooks();
+          saveDramas();
+          renderNotebookBar();
+          renderDramas();
+          closeModal('notebookModal');
+          showToast('已刪除筆記本「' + (nb ? nb.name : '') + '」');
         }
 
         /* =========================================================
@@ -2938,6 +3439,7 @@
           dramas = dramas.filter(function (d) { return d.id !== deleteTargetId; });
           delete expandedIds[deleteTargetId];
           saveDramas();
+          renderNotebookBar();
           renderDramas();
           closeModal('deleteModal');
           if (item) showToast('已刪除《' + item.title + '》');
@@ -2964,8 +3466,9 @@
         function exportBackup() {
           var payload = {
             app: 'cozy-drama-notes',
-            version: 2,
+            version: 3,
             exportedAt: new Date().toISOString(),
+            notebooks: notebooks,
             dramas: dramas,
           };
           var jsonStr = JSON.stringify(payload, null, 2);
@@ -2981,18 +3484,21 @@
           setTimeout(function () {
             URL.revokeObjectURL(url);
           }, 1000);
-          showToast('已匯出追劇備份檔案（共 ' + dramas.length + ' 部）');
+          showToast('已匯出追劇備份檔案（' + notebooks.length + ' 本筆記、共 ' + dramas.length + ' 部）');
         }
 
-        function sanitizeImportedItems(arr) {
+        function sanitizeImportedItems(arr, validNbIds) {
           var validStatuses = { watching: true, plan: true, completed: true };
+          var fallbackNb = getFallbackNotebookId();
           var out = [];
           for (var i = 0; i < arr.length; i++) {
             var item = arr[i];
             if (!item || typeof item.title !== 'string' || !item.title.trim()) continue;
             var rawUrl = typeof item.url === 'string' ? item.url.trim() : '';
+            var nbId = typeof item.notebookId === 'string' && validNbIds[item.notebookId] ? item.notebookId : fallbackNb;
             out.push({
               id: typeof item.id === 'string' && item.id ? item.id : generateId(),
+              notebookId: nbId,
               title: item.title.trim().slice(0, 100),
               episodeMode: item.episodeMode === 'season' ? 'season' : 'single',
               season: Math.max(1, parseInt(item.season, 10) || 1),
@@ -3021,14 +3527,37 @@
                 showToast('檔案格式不正確，請選擇有效的備份 JSON');
                 return;
               }
-              var cleaned = sanitizeImportedItems(list);
-              if (cleaned.length === 0) {
+              var importedNotebooks =
+                parsed && Array.isArray(parsed.notebooks) && parsed.notebooks.length > 0
+                  ? parsed.notebooks.map(normalizeNotebookRecord)
+                  : null;
+
+              var validNbMap = {};
+              if (importedNotebooks) {
+                for (var n = 0; n < importedNotebooks.length; n++) {
+                  validNbMap[importedNotebooks[n].id] = true;
+                }
+              } else {
+                for (var m = 0; m < notebooks.length; m++) {
+                  validNbMap[notebooks[m].id] = true;
+                }
+              }
+
+              var cleaned = sanitizeImportedItems(list, validNbMap);
+              if (cleaned.length === 0 && !importedNotebooks) {
                 showToast('備份檔案內沒有可用的劇集資料');
                 return;
               }
-              pendingImportDramas = cleaned;
+              pendingImportData = {
+                notebooks: importedNotebooks,
+                dramas: cleaned,
+              };
               document.getElementById('importModalSummary').textContent =
-                '在備份檔案中找到 ' + cleaned.length + ' 部劇集紀錄，請問要如何匯入？';
+                '在備份檔案中找到 ' +
+                cleaned.length +
+                ' 部劇集紀錄' +
+                (importedNotebooks ? '（含 ' + importedNotebooks.length + ' 本筆記本）' : '') +
+                '，請問要如何匯入？';
               openModal('importModal');
             } catch (err) {
               showToast('無法解析 JSON 檔案，請確認檔案是否損毀');
@@ -3038,19 +3567,33 @@
         }
 
         function applyImport(mode) {
-          if (!pendingImportDramas) return;
+          if (!pendingImportData) return;
+          var incNotebooks = pendingImportData.notebooks;
+          var incDramas = pendingImportData.dramas;
+
           if (mode === 'replace') {
-            dramas = pendingImportDramas;
+            notebooks = incNotebooks && incNotebooks.length > 0 ? incNotebooks : createDefaultNotebooks();
+            dramas = incDramas.map(normalizeDramaRecord);
+            currentNotebookId = notebooks[0].id;
             expandedIds = {};
             showToast('已還原 ' + dramas.length + ' 部劇集紀錄');
           } else {
+            if (incNotebooks) {
+              var nbMap = {};
+              for (var n = 0; n < notebooks.length; n++) nbMap[notebooks[n].id] = true;
+              for (var k = 0; k < incNotebooks.length; k++) {
+                if (!nbMap[incNotebooks[k].id]) {
+                  notebooks.push(incNotebooks[k]);
+                }
+              }
+            }
             var existingMap = {};
             for (var i = 0; i < dramas.length; i++) {
               existingMap[dramas[i].id] = i;
             }
             var added = 0;
-            for (var j = 0; j < pendingImportDramas.length; j++) {
-              var inc = pendingImportDramas[j];
+            for (var j = 0; j < incDramas.length; j++) {
+              var inc = normalizeDramaRecord(incDramas[j]);
               if (existingMap[inc.id] !== undefined) {
                 dramas[existingMap[inc.id]] = inc;
               } else {
@@ -3060,8 +3603,10 @@
             }
             showToast('已合併匯入（新增 ' + added + ' 部紀錄）');
           }
-          pendingImportDramas = null;
+          pendingImportData = null;
+          saveNotebooks();
           saveDramas();
+          renderNotebookBar();
           renderDramas();
           closeModal('importModal');
         }
@@ -3154,6 +3699,34 @@
         function bindEvents() {
           // Theme toggle
           document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+
+          // Notebook switcher & modal
+          document.getElementById('notebookScroller').addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-notebook-id]');
+            if (!btn) return;
+            switchNotebook(btn.getAttribute('data-notebook-id'));
+          });
+          document.getElementById('addNotebookBtn').addEventListener('click', function () {
+            openNotebookModal(null);
+          });
+          document.getElementById('editNotebookBtn').addEventListener('click', function () {
+            if (currentNotebookId !== 'all') openNotebookModal(currentNotebookId);
+          });
+          document.getElementById('closeNotebookModalBtn').addEventListener('click', function () {
+            closeModal('notebookModal');
+          });
+          document.getElementById('cancelNotebookModalBtn').addEventListener('click', function () {
+            closeModal('notebookModal');
+          });
+          document.getElementById('notebookForm').addEventListener('submit', handleNotebookFormSubmit);
+          document.getElementById('deleteNotebookBtn').addEventListener('click', handleDeleteNotebook);
+
+          var emojiBtns = document.querySelectorAll('#notebookEmojiPicker .emoji-option');
+          for (var eIdx = 0; eIdx < emojiBtns.length; eIdx++) {
+            emojiBtns[eIdx].addEventListener('click', function () {
+              setNotebookEmoji(this.getAttribute('data-emoji'));
+            });
+          }
 
           // Tabs
           var tabBtns = document.querySelectorAll('.tab-btn');
@@ -3306,8 +3879,9 @@
           setupPWA();
           setupInstallPromptUI();
           setupOnlineStatus();
-          loadDramas();
+          loadState();
           bindEvents();
+          renderNotebookBar();
           renderDramas();
         });
 
