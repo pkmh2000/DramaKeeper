@@ -2257,7 +2257,13 @@
                 <span>貼上</span>
               </button>
             </div>
-            <div class="helper-text">貼上網址後會自動辨識影音平台標籤</div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px">
+              <span id="formUrlFetchStatus" class="helper-text" style="margin-top: 0">貼上網址後會自動辨識平台並嘗試帶入劇名</span>
+              <button type="button" id="fetchTitleBtn" class="btn-paste-mini" title="從目前連結抓取劇名或影片標題">
+                <i data-lucide="sparkles" width="12" height="12"></i>
+                <span>帶入劇名</span>
+              </button>
+            </div>
           </div>
 
           <div class="form-group">
@@ -3600,6 +3606,175 @@
           }
         }
 
+        var urlFetchToken = 0;
+        var urlFetchDebounceTimer = null;
+
+        function cleanFetchedTitle(rawTitle) {
+          if (!rawTitle || typeof rawTitle !== 'string') return '';
+          var title = rawTitle.replace(/\s+/g, ' ').trim();
+          // Strip common platform suffixes
+          title = title.replace(/\s*[-|_｜]\s*(YouTube|bilibili|哔哩哔哩(?:_bilibili)?|彈幕網|Netflix|iQIYI|愛奇藝|Disney\+|LINE TV|friDay影音).*$/i, '').trim();
+          var lower = title.toLowerCase();
+          var blocked = [
+            'youtube',
+            'bilibili',
+            'netflix',
+            'iqiyi',
+            '愛奇藝',
+            'disney+',
+            'line tv',
+            'friday影音',
+            'just a moment...',
+            'just a moment',
+            'attention required!',
+            'access denied',
+            '403 forbidden',
+            '404 not found',
+            'sign in',
+            'log in',
+            '登入',
+            'robot or human?',
+            'verify you are human',
+          ];
+          if (!title || title.length < 2 || blocked.indexOf(lower) !== -1) {
+            return '';
+          }
+          return title.slice(0, 100);
+        }
+
+        function fetchJsonWithTimeout(endpoint, timeoutMs) {
+          var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+          var timer = controller
+            ? setTimeout(function () {
+                controller.abort();
+              }, timeoutMs || 5000)
+            : null;
+
+          return fetch(endpoint, controller ? { signal: controller.signal } : {})
+            .then(function (res) {
+              if (!res.ok) throw new Error('HTTP ' + res.status);
+              return res.json();
+            })
+            .finally(function () {
+              if (timer) clearTimeout(timer);
+            });
+        }
+
+        function extractTitleFromHtmlString(htmlStr) {
+          if (!htmlStr || typeof htmlStr !== 'string') return '';
+          try {
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(htmlStr, 'text/html');
+            var og = doc.querySelector('meta[property="og:title"]');
+            if (og && og.getAttribute('content')) return og.getAttribute('content');
+            var tw = doc.querySelector('meta[name="twitter:title"]');
+            if (tw && tw.getAttribute('content')) return tw.getAttribute('content');
+            if (doc.title) return doc.title;
+          } catch (e) {}
+          return '';
+        }
+
+        function setFormUrlFetchStatus(text, isHighlight) {
+          var el = document.getElementById('formUrlFetchStatus');
+          if (!el) return;
+          el.textContent = text;
+          el.style.color = isHighlight ? 'var(--accent)' : '';
+        }
+
+        function fetchTitleFromUrl(rawUrl, options) {
+          var opts = options || {};
+          var trimmed = (rawUrl || '').trim();
+          if (!trimmed || !isSafeUrl(trimmed)) {
+            if (opts.manual) showToast('請先輸入或貼上有效的網址');
+            return;
+          }
+
+          var titleInput = document.getElementById('formTitle');
+          if (!opts.forceOverwrite && titleInput && titleInput.value.trim()) {
+            return;
+          }
+
+          if (navigator.onLine === false) {
+            setFormUrlFetchStatus('目前為離線模式，請手動輸入劇名', false);
+            if (opts.manual) showToast('目前處於離線狀態，無法讀取網頁標題');
+            return;
+          }
+
+          var normalized = normalizeUrl(trimmed);
+          var lowerUrl = normalized.toLowerCase();
+          var myToken = ++urlFetchToken;
+          var fetchBtn = document.getElementById('fetchTitleBtn');
+          if (fetchBtn) fetchBtn.disabled = true;
+          setFormUrlFetchStatus('正在抓取影片／戲劇標題...', true);
+
+          var tryPromise;
+          if (lowerUrl.indexOf('youtube.com') !== -1 || lowerUrl.indexOf('youtu.be') !== -1) {
+            tryPromise = fetchJsonWithTimeout('https://www.youtube.com/oembed?url=' + encodeURIComponent(normalized) + '&format=json', 4500)
+              .then(function (data) {
+                var t = cleanFetchedTitle(data && data.title);
+                if (t) return t;
+                throw new Error('No YouTube title');
+              })
+              .catch(function () {
+                return fetchJsonWithTimeout('https://noembed.com/embed?url=' + encodeURIComponent(normalized), 4500).then(function (data) {
+                  return cleanFetchedTitle(data && data.title);
+                });
+              });
+          } else {
+            tryPromise = fetchJsonWithTimeout('https://noembed.com/embed?url=' + encodeURIComponent(normalized), 4000)
+              .then(function (data) {
+                var t = cleanFetchedTitle(data && data.title);
+                if (t) return t;
+                throw new Error('No oEmbed title');
+              })
+              .catch(function () {
+                return fetchJsonWithTimeout('https://api.microlink.io/?url=' + encodeURIComponent(normalized), 5000).then(function (data) {
+                  var t = cleanFetchedTitle(data && data.data && data.data.title);
+                  if (t) return t;
+                  throw new Error('No Microlink title');
+                });
+              })
+              .catch(function () {
+                return fetchJsonWithTimeout('https://api.allorigins.win/get?url=' + encodeURIComponent(normalized), 5500).then(function (data) {
+                  return cleanFetchedTitle(extractTitleFromHtmlString(data && data.contents));
+                });
+              });
+          }
+
+          tryPromise
+            .then(function (foundTitle) {
+              if (myToken !== urlFetchToken) return;
+              if (fetchBtn) fetchBtn.disabled = false;
+              if (!foundTitle) {
+                setFormUrlFetchStatus('無法自動取得該網站標題，請手動輸入劇名', false);
+                if (opts.manual) showToast('此網站限制自動讀取標題，請手動輸入劇名');
+                return;
+              }
+              if (titleInput && (opts.forceOverwrite || !titleInput.value.trim())) {
+                titleInput.value = foundTitle;
+                setFormUrlFetchStatus('已自動帶入劇名，可隨時修改微調', true);
+                showToast('已帶入劇名：《' + foundTitle + '》');
+              } else {
+                setFormUrlFetchStatus('貼上網址後會自動辨識平台並嘗試帶入劇名', false);
+              }
+            })
+            .catch(function () {
+              if (myToken !== urlFetchToken) return;
+              if (fetchBtn) fetchBtn.disabled = false;
+              setFormUrlFetchStatus('無法自動取得該網站標題，請手動輸入劇名', false);
+              if (opts.manual) showToast('無法取得該網站標題（可能受登入或防抓取限制）');
+            });
+        }
+
+        function scheduleUrlTitleFetch(rawUrl) {
+          if (urlFetchDebounceTimer) clearTimeout(urlFetchDebounceTimer);
+          var val = (rawUrl || '').trim();
+          if (!val || val.indexOf('.') === -1 || !isSafeUrl(val)) return;
+          urlFetchDebounceTimer = setTimeout(function () {
+            fetchTitleFromUrl(val, { forceOverwrite: false, manual: false });
+          }, 320);
+        }
+
         function updateFormPlatformPreview() {
           var urlVal = document.getElementById('formUrl').value;
           var previewEl = document.getElementById('formPlatformPreview');
@@ -3655,6 +3830,9 @@
             setFormStatus(currentTab || 'watching');
           }
 
+          urlFetchToken++;
+          if (urlFetchDebounceTimer) clearTimeout(urlFetchDebounceTimer);
+          setFormUrlFetchStatus('貼上網址後會自動辨識平台並嘗試帶入劇名', false);
           updateFormPlatformPreview();
           openModal('dramaModal');
           setTimeout(function () {
@@ -4652,7 +4830,21 @@
           document.getElementById('closeDramaModalBtn').addEventListener('click', function () { closeModal('dramaModal'); });
           document.getElementById('cancelDramaModalBtn').addEventListener('click', function () { closeModal('dramaModal'); });
           document.getElementById('dramaForm').addEventListener('submit', handleDramaFormSubmit);
-          document.getElementById('formUrl').addEventListener('input', updateFormPlatformPreview);
+          document.getElementById('formUrl').addEventListener('input', function () {
+            updateFormPlatformPreview();
+            scheduleUrlTitleFetch(this.value);
+          });
+          document.getElementById('formUrl').addEventListener('paste', function () {
+            var self = this;
+            setTimeout(function () {
+              if (urlFetchDebounceTimer) clearTimeout(urlFetchDebounceTimer);
+              updateFormPlatformPreview();
+              fetchTitleFromUrl(self.value, { forceOverwrite: false, manual: false });
+            }, 30);
+          });
+          document.getElementById('fetchTitleBtn').addEventListener('click', function () {
+            fetchTitleFromUrl(document.getElementById('formUrl').value, { forceOverwrite: true, manual: true });
+          });
 
           var modeBtns = document.querySelectorAll('#formEpisodeModeSelector .mode-option');
           for (var mIdx = 0; mIdx < modeBtns.length; mIdx++) {
