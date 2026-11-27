@@ -168,6 +168,12 @@
         align-items: center;
         gap: 10px;
         min-width: 0;
+        text-align: left;
+        transition: opacity 150ms ease;
+      }
+
+      .brand:hover {
+        opacity: 0.84;
       }
 
       .brand-icon {
@@ -537,6 +543,197 @@
         .notebook-bar-actions {
           justify-content: flex-end;
         }
+      }
+
+      /* Homepage Notebook Selector Gate */
+      .notebook-gate {
+        background-color: var(--bg-surface);
+        border: 1px solid var(--border-hairline);
+        border-radius: var(--radius-card);
+        padding: 24px 18px;
+        box-shadow: var(--shadow-card);
+        text-align: center;
+        margin-top: 8px;
+        animation: cardEnter 220ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .notebook-gate-icon {
+        width: 56px;
+        height: 56px;
+        margin: 0 auto 12px;
+        border-radius: 16px;
+        background-color: var(--accent-soft);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .notebook-gate-title {
+        margin: 0 0 6px;
+        font-size: 1.12rem;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .notebook-gate-desc {
+        margin: 0 0 18px;
+        font-size: 13.5px;
+        color: var(--text-secondary);
+      }
+
+      .notebook-gate-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+        gap: 10px;
+        text-align: left;
+        margin-bottom: 16px;
+      }
+
+      .notebook-gate-btn {
+        min-height: 54px;
+        padding: 10px 14px;
+        border-radius: 13px;
+        background-color: var(--bg-page);
+        border: 1px solid var(--border-strong);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        transition: border-color 150ms ease, background-color 150ms ease, transform 120ms ease;
+      }
+
+      .notebook-gate-btn:hover {
+        border-color: var(--accent);
+        background-color: var(--accent-soft);
+      }
+
+      .notebook-gate-btn:active {
+        transform: scale(0.98);
+      }
+
+      .notebook-gate-btn.is-all {
+        background-color: var(--accent-soft);
+        border-color: var(--accent);
+      }
+
+      .notebook-gate-left {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        min-width: 0;
+      }
+
+      .notebook-gate-name {
+        font-size: 14.5px;
+        font-weight: 700;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .notebook-gate-count {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--text-muted);
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .notebook-gate-btn.is-all .notebook-gate-count {
+        color: var(--accent);
+      }
+
+      .notebook-gate-footer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding-top: 12px;
+        border-top: 1px solid var(--border-hairline);
+      }
+
+      /* One-Tap Paste Controls */
+      .search-paste-group {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .input-paste-row {
+        display: flex;
+        align-items: stretch;
+        gap: 8px;
+      }
+
+      .input-paste-row.align-top {
+        align-items: flex-start;
+      }
+
+      .input-paste-row .form-control {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .btn-paste {
+        min-height: 44px;
+        padding: 0 12px;
+        border-radius: var(--radius-input);
+        background-color: var(--bg-subtle);
+        border: 1px solid var(--border-strong);
+        color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, transform 120ms ease;
+      }
+
+      .btn-paste:hover {
+        background-color: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .btn-paste:active {
+        transform: scale(0.96);
+      }
+
+      .btn-paste.pasted,
+      .btn-paste-mini.pasted {
+        background-color: var(--success-soft);
+        border-color: var(--success);
+        color: var(--success);
+      }
+
+      .btn-paste-mini {
+        min-height: 26px;
+        padding: 2px 8px;
+        border-radius: 7px;
+        background-color: var(--bg-subtle);
+        border: 1px solid var(--border-strong);
+        color: var(--text-secondary);
+        font-size: 11.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+      }
+
+      .btn-paste-mini:hover {
+        background-color: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent);
       }
 
       /* Tabs */
@@ -1788,7 +1985,7 @@
 
     <header class="app-header">
       <div class="header-inner">
-        <div class="brand">
+        <button type="button" id="brandHomeBtn" class="brand" title="回到首頁選擇筆記本">
           <div class="brand-icon" aria-hidden="true">
             <svg viewBox="0 0 64 64" width="34" height="34" xmlns="http://www.w3.org/2000/svg">
               <rect width="64" height="64" rx="14" fill="#D97757" />
@@ -1804,7 +2001,7 @@
             </svg>
           </div>
           <h1 class="brand-title">溫馨追劇筆記</h1>
-        </div>
+        </button>
 
         <div class="header-actions">
           <button type="button" id="pwaInstallBtn" class="pwa-install-btn hidden" aria-label="安裝應用程式">
@@ -1845,8 +2042,28 @@
         </div>
       </div>
 
+      <!-- Initial Notebook Selection Gate (shows before a notebook or 全劇 is picked) -->
+      <section id="notebookGateSection" class="notebook-gate" aria-label="選擇筆記本">
+        <div class="notebook-gate-icon" aria-hidden="true">
+          <i data-lucide="coffee" width="26" height="26"></i>
+        </div>
+        <h2 class="notebook-gate-title">選擇筆記本以列出戲劇清單</h2>
+        <p class="notebook-gate-desc">點擊下方或上方的「📚 全劇」或任一筆記本，立即開始追劇紀錄</p>
+        <div id="notebookGateGrid" class="notebook-gate-grid"></div>
+        <div class="notebook-gate-footer">
+          <button type="button" id="gateAddDramaBtn" class="btn-primary">
+            <i data-lucide="plus" width="17" height="17"></i>
+            <span>新增劇集</span>
+          </button>
+          <button type="button" id="gateAddNotebookBtn" class="btn-secondary">
+            <i data-lucide="folder-plus" width="16" height="16"></i>
+            <span>新增筆記本</span>
+          </button>
+        </div>
+      </section>
+
       <!-- Status Tabs -->
-      <nav class="tabs-wrapper" role="tablist" aria-label="追劇狀態分類">
+      <nav id="tabsWrapper" class="tabs-wrapper" role="tablist" aria-label="追劇狀態分類" style="display: none">
         <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-tab="watching">
           <span>🍿 正在追</span>
           <span class="tab-count tabular-nums" id="count-watching">0</span>
@@ -1862,20 +2079,26 @@
       </nav>
 
       <!-- Search & Add Toolbar -->
-      <div class="toolbar">
-        <div class="search-box">
-          <span class="search-icon" aria-hidden="true">
-            <i data-lucide="search" width="17" height="17"></i>
-          </span>
-          <input
-            type="search"
-            id="searchInput"
-            class="search-input"
-            placeholder="搜尋劇名或溫馨備註..."
-            aria-label="搜尋劇名或溫馨備註"
-          />
-          <button type="button" id="searchClearBtn" class="search-clear" aria-label="清除搜尋">
-            <i data-lucide="x" width="16" height="16"></i>
+      <div id="mainToolbar" class="toolbar" style="display: none">
+        <div class="search-paste-group">
+          <div class="search-box">
+            <span class="search-icon" aria-hidden="true">
+              <i data-lucide="search" width="17" height="17"></i>
+            </span>
+            <input
+              type="search"
+              id="searchInput"
+              class="search-input"
+              placeholder="搜尋劇名或溫馨備註..."
+              aria-label="搜尋劇名或溫馨備註"
+            />
+            <button type="button" id="searchClearBtn" class="search-clear" aria-label="清除搜尋">
+              <i data-lucide="x" width="16" height="16"></i>
+            </button>
+          </div>
+          <button type="button" class="btn-paste" data-paste-target="searchInput" title="一鍵貼上搜尋" aria-label="一鍵貼上搜尋">
+            <i data-lucide="clipboard-paste" width="15" height="15"></i>
+            <span>貼上</span>
           </button>
         </div>
         <button type="button" id="addDramaDesktopBtn" class="btn-primary btn-add-desktop">
@@ -1885,7 +2108,7 @@
       </div>
 
       <!-- Tree Controls Bar -->
-      <div class="tree-controls" id="treeControlsBar">
+      <div class="tree-controls" id="treeControlsBar" style="display: none">
         <span class="tree-summary" id="treeSummaryText">點擊劇集可展開樹狀明細</span>
         <div class="tree-bulk-btns">
           <button type="button" id="expandAllBtn" class="btn-tree-bulk">
@@ -1900,7 +2123,7 @@
       </div>
 
       <!-- Drama Cards Container -->
-      <section id="dramaList" class="drama-list" aria-live="polite"></section>
+      <section id="dramaList" class="drama-list" aria-live="polite" style="display: none"></section>
     </main>
 
     <!-- Mobile Thumb-Friendly Floating Add Button -->
@@ -1926,14 +2149,20 @@
             <label for="formTitle" class="form-label">
               <span>劇名 <span class="required-mark">*</span></span>
             </label>
-            <input
-              type="text"
-              id="formTitle"
-              class="form-control"
-              placeholder="例如：請回答 1988、葬送的芙莉蓮"
-              required
-              maxlength="100"
-            />
+            <div class="input-paste-row">
+              <input
+                type="text"
+                id="formTitle"
+                class="form-control"
+                placeholder="例如：請回答 1988、葬送的芙莉蓮"
+                required
+                maxlength="100"
+              />
+              <button type="button" class="btn-paste" data-paste-target="formTitle" title="一鍵貼上劇名" aria-label="一鍵貼上劇名">
+                <i data-lucide="clipboard-paste" width="15" height="15"></i>
+                <span>貼上</span>
+              </button>
+            </div>
           </div>
 
           <div class="form-group">
@@ -1950,7 +2179,13 @@
 
           <div class="form-row-2" id="formEpisodeGrid">
             <div class="form-group" id="formSeasonGroup" style="display: none">
-              <label for="formSeason" class="form-label">第幾季</label>
+              <label for="formSeason" class="form-label">
+                <span>第幾季</span>
+                <button type="button" class="btn-paste-mini" data-paste-target="formSeason" title="一鍵貼上數字" aria-label="一鍵貼上第幾季">
+                  <i data-lucide="clipboard-paste" width="12" height="12"></i>
+                  <span>貼上</span>
+                </button>
+              </label>
               <input
                 type="number"
                 id="formSeason"
@@ -1963,7 +2198,13 @@
             </div>
 
             <div class="form-group">
-              <label for="formCurrentEp" class="form-label" id="formCurrentEpLabel">已看到第幾集</label>
+              <label for="formCurrentEp" class="form-label" id="formCurrentEpLabel">
+                <span id="formCurrentEpLabelText">已看到第幾集</span>
+                <button type="button" class="btn-paste-mini" data-paste-target="formCurrentEp" title="一鍵貼上數字" aria-label="一鍵貼上已看集數">
+                  <i data-lucide="clipboard-paste" width="12" height="12"></i>
+                  <span>貼上</span>
+                </button>
+              </label>
               <input
                 type="number"
                 id="formCurrentEp"
@@ -1976,7 +2217,13 @@
             </div>
 
             <div class="form-group">
-              <label for="formTotalEp" class="form-label" id="formTotalEpLabel">總集數（選填）</label>
+              <label for="formTotalEp" class="form-label" id="formTotalEpLabel">
+                <span id="formTotalEpLabelText">總集數（選填）</span>
+                <button type="button" class="btn-paste-mini" data-paste-target="formTotalEp" title="一鍵貼上數字" aria-label="一鍵貼上總集數">
+                  <i data-lucide="clipboard-paste" width="12" height="12"></i>
+                  <span>貼上</span>
+                </button>
+              </label>
               <input
                 type="number"
                 id="formTotalEp"
@@ -1997,13 +2244,19 @@
               <span>下一集／目前觀看連結</span>
               <span id="formPlatformPreview"></span>
             </label>
-            <input
-              type="url"
-              id="formUrl"
-              class="form-control"
-              placeholder="貼上 YouTube、Bilibili、Netflix 等網址..."
-              inputmode="url"
-            />
+            <div class="input-paste-row">
+              <input
+                type="url"
+                id="formUrl"
+                class="form-control"
+                placeholder="貼上 YouTube、Bilibili、Netflix 等網址..."
+                inputmode="url"
+              />
+              <button type="button" class="btn-paste" data-paste-target="formUrl" title="一鍵貼上網址" aria-label="一鍵貼上網址">
+                <i data-lucide="clipboard-paste" width="15" height="15"></i>
+                <span>貼上</span>
+              </button>
+            </div>
             <div class="helper-text">貼上網址後會自動辨識影音平台標籤</div>
           </div>
 
@@ -2023,12 +2276,18 @@
 
           <div class="form-group">
             <label for="formNote" class="form-label">溫馨小備註（選填）</label>
-            <textarea
-              id="formNote"
-              class="form-control"
-              placeholder="例如：第5集超好哭、記得準備面紙與熱可可..."
-              maxlength="400"
-            ></textarea>
+            <div class="input-paste-row align-top">
+              <textarea
+                id="formNote"
+                class="form-control"
+                placeholder="例如：第5集超好哭、記得準備面紙與熱可可..."
+                maxlength="400"
+              ></textarea>
+              <button type="button" class="btn-paste" data-paste-target="formNote" title="一鍵貼上備註" aria-label="一鍵貼上備註">
+                <i data-lucide="clipboard-paste" width="15" height="15"></i>
+                <span>貼上</span>
+              </button>
+            </div>
           </div>
 
           <div class="modal-footer">
@@ -2056,14 +2315,20 @@
             <label for="formNotebookName" class="form-label">
               <span>筆記本名稱 <span class="required-mark">*</span></span>
             </label>
-            <input
-              type="text"
-              id="formNotebookName"
-              class="form-control"
-              placeholder="例如：韓劇清單、週末動畫、家人一起看"
-              required
-              maxlength="30"
-            />
+            <div class="input-paste-row">
+              <input
+                type="text"
+                id="formNotebookName"
+                class="form-control"
+                placeholder="例如：韓劇清單、週末動畫、家人一起看"
+                required
+                maxlength="30"
+              />
+              <button type="button" class="btn-paste" data-paste-target="formNotebookName" title="一鍵貼上筆記本名稱" aria-label="一鍵貼上筆記本名稱">
+                <i data-lucide="clipboard-paste" width="15" height="15"></i>
+                <span>貼上</span>
+              </button>
+            </div>
           </div>
 
           <div class="form-group">
@@ -2140,16 +2405,20 @@
         <input type="hidden" id="moveNotebookDramaId" />
         <div id="moveNotebookList" class="move-nb-list"></div>
         <div style="border-top: 1px solid var(--border-hairline); padding-top: 12px">
-          <form id="quickCreateMoveForm" style="display: flex; gap: 8px">
+          <form id="quickCreateMoveForm" style="display: flex; gap: 6px">
             <input
               type="text"
               id="quickCreateNbInput"
               class="form-control"
-              placeholder="輸入新筆記本名稱並直接移入..."
+              placeholder="輸入新筆記本名稱..."
               maxlength="30"
-              style="min-height: 44px; flex: 1"
+              style="min-height: 44px; flex: 1; min-width: 0"
             />
-            <button type="submit" class="btn-primary" style="height: 44px; padding: 0 14px">新建並移入</button>
+            <button type="button" class="btn-paste" data-paste-target="quickCreateNbInput" title="一鍵貼上筆記本名稱" aria-label="一鍵貼上筆記本名稱">
+              <i data-lucide="clipboard-paste" width="15" height="15"></i>
+              <span>貼上</span>
+            </button>
+            <button type="submit" class="btn-primary" style="height: 44px; padding: 0 12px">新建並移入</button>
           </form>
         </div>
       </div>
@@ -2180,13 +2449,19 @@
               <span>要順便更新下一集的網址嗎？</span>
               <span id="nextEpPlatformPreview"></span>
             </label>
-            <input
-              type="url"
-              id="nextEpUrlInput"
-              class="form-control"
-              placeholder="貼上新的集數網址，或保留原本連結..."
-              inputmode="url"
-            />
+            <div class="input-paste-row">
+              <input
+                type="url"
+                id="nextEpUrlInput"
+                class="form-control"
+                placeholder="貼上新的集數網址，或保留原本連結..."
+                inputmode="url"
+              />
+              <button type="button" class="btn-paste" data-paste-target="nextEpUrlInput" title="一鍵貼上網址" aria-label="一鍵貼上網址">
+                <i data-lucide="clipboard-paste" width="15" height="15"></i>
+                <span>貼上</span>
+              </button>
+            </div>
             <div class="helper-text" id="nextEpOldUrlHint"></div>
           </div>
 
@@ -2371,7 +2646,7 @@
            2. State, Notebooks & Sample Seed Data
            ========================================================= */
         var currentTab = 'watching';
-        var currentNotebookId = 'nb_default';
+        var currentNotebookId = null;
         var searchQuery = '';
         var notebooks = [];
         var dramas = [];
@@ -2484,12 +2759,8 @@
               saveNotebooks();
             }
 
-            var savedActiveNb = localStorage.getItem(ACTIVE_NOTEBOOK_KEY);
-            if (savedActiveNb === 'all' || notebooks.some(function (n) { return n.id === savedActiveNb; })) {
-              currentNotebookId = savedActiveNb;
-            } else {
-              currentNotebookId = notebooks[0].id;
-            }
+            // Start unselected on homepage so drama list only renders after choosing a notebook or 全劇
+            currentNotebookId = null;
 
             var raw = localStorage.getItem(STORAGE_KEY);
             var initialized = localStorage.getItem(INIT_FLAG_KEY);
@@ -2509,7 +2780,7 @@
             }
           } catch (e) {
             notebooks = createDefaultNotebooks();
-            currentNotebookId = notebooks[0].id;
+            currentNotebookId = null;
             dramas = createSampleDramas();
           }
         }
@@ -2517,7 +2788,11 @@
         function saveNotebooks() {
           try {
             localStorage.setItem(NOTEBOOKS_KEY, JSON.stringify(notebooks));
-            localStorage.setItem(ACTIVE_NOTEBOOK_KEY, currentNotebookId);
+            if (currentNotebookId) {
+              localStorage.setItem(ACTIVE_NOTEBOOK_KEY, currentNotebookId);
+            } else {
+              localStorage.removeItem(ACTIVE_NOTEBOOK_KEY);
+            }
           } catch (e) {}
         }
 
@@ -2643,7 +2918,8 @@
           'folder-input': '<path d="M2 9V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1"/><path d="M2 13h10"/><path d="m9 16 3-3-3-3"/>',
           'arrow-right-left': '<path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/>',
           'arrow-up': '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
-          'arrow-down': '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>'
+          'arrow-down': '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
+          'clipboard-paste': '<path d="M15 2H9a1 1 0 0 0-1 1v2c0 .6.4 1 1 1h6c.6 0 1-.4 1-1V3c0-.6-.4-1-1-1Z"/><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2M16 4h2a2 2 0 0 1 2 2v2M11 14h10"/><path d="m17 10 4 4-4 4"/>'
         };
 
         function refreshIcons() {
@@ -2745,17 +3021,15 @@
           }
 
           var html = '';
-          if (notebooks.length > 1) {
-            html +=
-              '<button type="button" class="notebook-btn' +
-              (currentNotebookId === 'all' ? ' active' : '') +
-              '" data-notebook-id="all">' +
-              '<span>📚 全部</span>' +
-              '<span class="nb-count tabular-nums">' +
-              dramas.length +
-              '</span>' +
-              '</button>';
-          }
+          html +=
+            '<button type="button" class="notebook-btn' +
+            (currentNotebookId === 'all' ? ' active' : '') +
+            '" data-notebook-id="all">' +
+            '<span>📚 全劇</span>' +
+            '<span class="nb-count tabular-nums">' +
+            dramas.length +
+            '</span>' +
+            '</button>';
 
           for (var j = 0; j < notebooks.length; j++) {
             var nb = notebooks[j];
@@ -2778,8 +3052,62 @@
           }
 
           scroller.innerHTML = html;
+          renderNotebookGate(counts);
           if (document.getElementById('manageNotebooksModal').classList.contains('open')) {
             renderManageNotebooksList();
+          }
+        }
+
+        function renderNotebookGate(counts) {
+          var gateSection = document.getElementById('notebookGateSection');
+          var gateGrid = document.getElementById('notebookGateGrid');
+          var tabsWrapper = document.getElementById('tabsWrapper');
+          var mainToolbar = document.getElementById('mainToolbar');
+          var controlsBar = document.getElementById('treeControlsBar');
+          var dramaList = document.getElementById('dramaList');
+          var mobileFab = document.getElementById('addDramaMobileBtn');
+
+          var isUnselected = !currentNotebookId;
+          if (gateSection) gateSection.style.display = isUnselected ? 'block' : 'none';
+          if (tabsWrapper) tabsWrapper.style.display = isUnselected ? 'none' : 'grid';
+          if (mainToolbar) mainToolbar.style.display = isUnselected ? 'none' : 'flex';
+          if (dramaList) dramaList.style.display = isUnselected ? 'none' : 'flex';
+          if (isUnselected && controlsBar) controlsBar.style.display = 'none';
+          if (mobileFab) mobileFab.style.display = isUnselected ? 'none' : '';
+
+          if (isUnselected && gateGrid) {
+            var gridHtml =
+              '<button type="button" class="notebook-gate-btn is-all" data-notebook-id="all">' +
+              '  <span class="notebook-gate-left">' +
+              '    <span style="font-size: 20px">📚</span>' +
+              '    <span class="notebook-gate-name">全劇</span>' +
+              '  </span>' +
+              '  <span class="notebook-gate-count tabular-nums">' +
+              dramas.length +
+              ' 部</span>' +
+              '</button>';
+
+            for (var j = 0; j < notebooks.length; j++) {
+              var nb = notebooks[j];
+              gridHtml +=
+                '<button type="button" class="notebook-gate-btn" data-notebook-id="' +
+                escapeHtml(nb.id) +
+                '">' +
+                '  <span class="notebook-gate-left">' +
+                '    <span style="font-size: 20px">' +
+                escapeHtml(nb.icon) +
+                '</span>' +
+                '    <span class="notebook-gate-name">' +
+                escapeHtml(nb.name) +
+                '</span>' +
+                '  </span>' +
+                '  <span class="notebook-gate-count tabular-nums">' +
+                (counts[nb.id] || 0) +
+                ' 部</span>' +
+                '</button>';
+            }
+            gateGrid.innerHTML = gridHtml;
+            refreshIcons();
           }
         }
 
@@ -2792,6 +3120,7 @@
 
         function updateTabCounts() {
           var counts = { watching: 0, plan: 0, completed: 0 };
+          if (!currentNotebookId) return;
           for (var i = 0; i < dramas.length; i++) {
             var item = dramas[i];
             if (currentNotebookId !== 'all' && ensureValidNotebookId(item.notebookId) !== currentNotebookId) {
@@ -2892,6 +3221,13 @@
         }
 
         function renderDramas() {
+          if (!currentNotebookId) {
+            var controlsBarHidden = document.getElementById('treeControlsBar');
+            if (controlsBarHidden) controlsBarHidden.style.display = 'none';
+            refreshIcons();
+            return;
+          }
+
           updateTabCounts();
 
           var listEl = document.getElementById('dramaList');
@@ -3248,19 +3584,19 @@
           }
           var seasonGroup = document.getElementById('formSeasonGroup');
           var epGrid = document.getElementById('formEpisodeGrid');
-          var curLabel = document.getElementById('formCurrentEpLabel');
-          var totLabel = document.getElementById('formTotalEpLabel');
+          var curLabelText = document.getElementById('formCurrentEpLabelText');
+          var totLabelText = document.getElementById('formTotalEpLabelText');
 
           if (selectedEpisodeMode === 'season') {
             seasonGroup.style.display = 'block';
             epGrid.className = 'form-row-3';
-            curLabel.textContent = '已看第幾集';
-            totLabel.textContent = '本季總集數';
+            if (curLabelText) curLabelText.textContent = '已看第幾集';
+            if (totLabelText) totLabelText.textContent = '本季總集數';
           } else {
             seasonGroup.style.display = 'none';
             epGrid.className = 'form-row-2';
-            curLabel.textContent = '已看到第幾集';
-            totLabel.textContent = '總集數（選填）';
+            if (curLabelText) curLabelText.textContent = '已看到第幾集';
+            if (totLabelText) totLabelText.textContent = '總集數（選填）';
           }
         }
 
@@ -3315,7 +3651,7 @@
             document.getElementById('formTotalEp').value = '';
             document.getElementById('formUrl').value = '';
             document.getElementById('formNote').value = '';
-            populateNotebookSelect(currentNotebookId === 'all' ? getFallbackNotebookId() : currentNotebookId);
+            populateNotebookSelect(!currentNotebookId || currentNotebookId === 'all' ? getFallbackNotebookId() : currentNotebookId);
             setFormStatus(currentTab || 'watching');
           }
 
@@ -4010,10 +4346,11 @@
           if (mode === 'replace') {
             notebooks = incNotebooks && incNotebooks.length > 0 ? incNotebooks : createDefaultNotebooks();
             dramas = incDramas.map(normalizeDramaRecord);
-            currentNotebookId = notebooks[0].id;
+            currentNotebookId = 'all';
             expandedIds = {};
             showToast('已還原 ' + dramas.length + ' 部劇集紀錄');
           } else {
+            if (!currentNotebookId) currentNotebookId = 'all';
             if (incNotebooks) {
               var nbMap = {};
               for (var n = 0; n < notebooks.length; n++) nbMap[notebooks[n].id] = true;
@@ -4132,15 +4469,94 @@
           update();
         }
 
+        function pasteFromClipboard(targetId, triggerBtn) {
+          var input = document.getElementById(targetId);
+          if (!input) return;
+
+          function applyPastedText(rawText) {
+            var text = typeof rawText === 'string' ? rawText : '';
+            if (!text.trim()) {
+              showToast('剪貼簿目前是空的唷');
+              input.focus();
+              return;
+            }
+            if (input.type === 'number') {
+              var match = text.match(/\d+/);
+              if (!match) {
+                showToast('剪貼簿內沒有找到數字');
+                input.focus();
+                return;
+              }
+              input.value = match[0];
+            } else {
+              var cleanText = text.trim();
+              if (input.tagName === 'TEXTAREA' && input.value.trim()) {
+                var start = typeof input.selectionStart === 'number' ? input.selectionStart : input.value.length;
+                var end = typeof input.selectionEnd === 'number' ? input.selectionEnd : input.value.length;
+                input.value = input.value.slice(0, start) + cleanText + input.value.slice(end);
+              } else {
+                input.value = cleanText;
+              }
+            }
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.focus();
+            if (triggerBtn) {
+              triggerBtn.classList.add('pasted');
+              setTimeout(function () {
+                triggerBtn.classList.remove('pasted');
+              }, 900);
+            }
+            showToast('已一鍵貼上！');
+          }
+
+          if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
+            navigator.clipboard
+              .readText()
+              .then(applyPastedText)
+              .catch(function () {
+                input.focus();
+                if (typeof input.select === 'function') input.select();
+                showToast('未取得剪貼簿權限，請長按輸入框或 Ctrl+V 貼上');
+              });
+          } else {
+            input.focus();
+            if (typeof input.select === 'function') input.select();
+            showToast('此瀏覽器不支援自動讀取剪貼簿，請長按輸入框貼上');
+          }
+        }
+
         function bindEvents() {
+          // Brand click returns to homepage notebook selector
+          document.getElementById('brandHomeBtn').addEventListener('click', function () {
+            switchNotebook(null);
+          });
+
+          // Global one-tap paste button delegation
+          document.addEventListener('click', function (e) {
+            var pasteBtn = e.target.closest('[data-paste-target]');
+            if (!pasteBtn) return;
+            pasteFromClipboard(pasteBtn.getAttribute('data-paste-target'), pasteBtn);
+          });
+
           // Theme toggle
           document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
 
-          // Notebook switcher & modal
+          // Notebook switcher & gate & modal
           document.getElementById('notebookScroller').addEventListener('click', function (e) {
             var btn = e.target.closest('[data-notebook-id]');
             if (!btn) return;
             switchNotebook(btn.getAttribute('data-notebook-id'));
+          });
+          document.getElementById('notebookGateGrid').addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-notebook-id]');
+            if (!btn) return;
+            switchNotebook(btn.getAttribute('data-notebook-id'));
+          });
+          document.getElementById('gateAddDramaBtn').addEventListener('click', function () {
+            openDramaModal(null);
+          });
+          document.getElementById('gateAddNotebookBtn').addEventListener('click', function () {
+            openNotebookModal(null);
           });
           document.getElementById('addNotebookBtn').addEventListener('click', function () {
             openNotebookModal(null);
